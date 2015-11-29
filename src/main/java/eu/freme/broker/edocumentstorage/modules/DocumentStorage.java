@@ -11,6 +11,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
@@ -22,6 +26,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import eu.freme.broker.edocumentstorage.exceptions.ExternalServiceFailedException;
 import eu.freme.broker.filemanagement.FileFactory;
+import eu.freme.broker.niftools.NIFWriter;
 
 /**
  * @author Julian Moreno Schneider julian.moreno_schneider@dfki.de
@@ -32,6 +37,10 @@ public class DocumentStorage {
 	private static String storageDirectory = "C:\\Users\\jmschnei\\Desktop\\dkt-test\\docStorage\\";
 	private static String uriPrefix = "http://dkt.dfki.de/storage/";
 
+	static String IV = "AAAAAAAAAAAAAAAA";
+	static String plaintext = "test text 123\0\0\0";
+	static String encryptionKey = "0123456789abcdef";
+	  
 	public DocumentStorage(){
 	}
 	
@@ -39,11 +48,11 @@ public class DocumentStorage {
 		this.storageDirectory = storageDirectory;
 	}
 	
-	public static String storeFileByPath(String storageFileName, String inputFileName) throws ExternalServiceFailedException {
+	public static String storeFileByPath(String storageFileName, String inputFileName, String prefix) throws ExternalServiceFailedException {
 		try{
 			File inputFil = FileFactory.generateFileInstance(inputFileName);
 			
-			return storeFileByFile(storageFileName, inputFil);
+			return storeFileByFile(storageFileName, inputFil, prefix);
 		}
 		catch(FileNotFoundException e){
 			e.printStackTrace();
@@ -55,7 +64,7 @@ public class DocumentStorage {
 		}
 	}
 
-	public static String storeFileByFile(String storageFileName, File inputFile) throws ExternalServiceFailedException {
+	public static String storeFileByFile(String storageFileName, File inputFile, String prefix) throws ExternalServiceFailedException {
 		try{
 			File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
 			if(fil.exists()){
@@ -89,9 +98,8 @@ public class DocumentStorage {
 			    stream.close();            // close the stream
 			}
 
-			String nifContent = "";
+			String nifContent = body;
 			
-			//TODO Extract the content and generated a NIF representation.
 			File fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");
 			if(fil2.exists()){
 				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
@@ -102,9 +110,15 @@ public class DocumentStorage {
 
 			Model outModel = ModelFactory.createDefaultModel();
 
-			//TODO Generate NIF Copiar de donde esté el codigo que hace lo mismo. Creo que en sesame se generaba.
-			
-			
+			String documentURI = "";
+			if(prefix==null || prefix.equalsIgnoreCase("")){
+				documentURI = "http://dkt.dfki.de/document/";
+			}
+			else{
+				documentURI = prefix;
+			}
+			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
+			NIFWriter.addInitialString(outModel, nifContent, documentURI);
 			
 			outModel = outModel.write(new FileOutputStream(fil2), "RDF/XML");
 			return outModel.toString();
@@ -121,10 +135,24 @@ public class DocumentStorage {
 			e.printStackTrace();
 			throw new ExternalServiceFailedException(e.getMessage());
 		}
-		catch(IOException e){
+		catch(Exception e){
 			e.printStackTrace();
 			throw new ExternalServiceFailedException(e.getMessage());
 		}
+	}
+
+	public static byte[] encrypt(String plainText, String encryptionKey) throws Exception {
+		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "SunJCE");
+		SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES");
+		cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
+		return cipher.doFinal(plainText.getBytes("UTF-8"));
+	}
+
+	public static String decrypt(byte[] cipherText, String encryptionKey) throws Exception{
+		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "SunJCE");
+		SecretKeySpec key = new SecretKeySpec(encryptionKey.getBytes("UTF-8"), "AES");
+		cipher.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(IV.getBytes("UTF-8")));
+		return new String(cipher.doFinal(cipherText),"UTF-8");
 	}
 
 	public static String getNIFContent(String storageFileName) throws ExternalServiceFailedException {
