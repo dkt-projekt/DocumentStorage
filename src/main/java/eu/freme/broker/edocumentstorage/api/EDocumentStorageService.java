@@ -19,13 +19,13 @@ import eu.freme.broker.edocumentstorage.modules.DocumentStorage;
 @Component
 public class EDocumentStorageService {
 	
-    public ResponseEntity<String> storeFileByPath(String storageName, String inputFilePath)
+    public ResponseEntity<String> storeFileByPath(String storageName, String inputFilePath, String preffix)
             throws ExternalServiceFailedException, BadRequestException {
         try {
         	EDocumentStorageService.checkNotNullOrEmpty(storageName, "No Storage specified");
         	EDocumentStorageService.checkNotNullOrEmpty(inputFilePath, "No inputFilePath specified");
         	
-       		String nifResult = DocumentStorage.storeFileByPath(storageName, inputFilePath);
+       		String nifResult = DocumentStorage.storeFileByPath(storageName, inputFilePath, preffix);
        		
            	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
         } catch (BadRequestException e) {
@@ -35,13 +35,13 @@ public class EDocumentStorageService {
     	}
     }
 
-    public ResponseEntity<String> storeFileByFile(String storageName, File inputFile)
+    public ResponseEntity<String> storeFileByFile(String storageName, File inputFile, String preffix)
             throws ExternalServiceFailedException, BadRequestException {
         try {
         	EDocumentStorageService.checkNotNullOrEmpty(storageName, "No Storage specified");
         	EDocumentStorageService.checkNotNull(inputFile, "No inputFilePath specified");
         	
-       		String nifResult = DocumentStorage.storeFileByFile(storageName, inputFile);
+       		String nifResult = DocumentStorage.storeFileByFile(storageName, inputFile, preffix);
        		
            	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
         } catch (BadRequestException e) {

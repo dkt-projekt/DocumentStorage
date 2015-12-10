@@ -2,6 +2,7 @@ package eu.freme.broker.edocumentstorage.modules;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -19,6 +21,7 @@ import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.sax.ToXMLContentHandler;
+import org.springframework.core.io.FileSystemResource;
 import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.rdf.model.Model;
@@ -34,8 +37,9 @@ import eu.freme.broker.niftools.NIFWriter;
  */
 public class DocumentStorage {
 
-	private static String storageDirectory = "C:\\Users\\jmschnei\\Desktop\\dkt-test\\docStorage\\";
-	private static String uriPrefix = "http://dkt.dfki.de/storage/";
+//	private static String storageDirectory = "C:\\Users\\jmschnei\\Desktop\\dkt-test\\docStorage\\";
+	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docstorage/";
+	private static String uriPrefix = "http://dkt.dfki.de/storage/document/";
 
 	static String IV = "AAAAAAAAAAAAAAAA";
 	static String plaintext = "test text 123\0\0\0";
@@ -67,15 +71,19 @@ public class DocumentStorage {
 	public static String storeFileByFile(String storageFileName, File inputFile, String prefix) throws ExternalServiceFailedException {
 		try{
 			File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
-			if(fil.exists()){
+			if(fil!=null && fil.exists()){
 				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
 			}
 			
-			if(!fil.createNewFile()){
-				throw new ExternalServiceFailedException("Error at creating the sotrageFile!!!");
+			FileSystemResource fsrDir = new FileSystemResource(storageDirectory);
+			File newFil = new File(fsrDir.getFile(),storageFileName);
+			if(!newFil.exists()){
+				if(!newFil.createNewFile()){
+					throw new ExternalServiceFailedException("Error at creating the storageFile!!!");
+				}
 			}
 			
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fil), "utf-8"));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFil), "utf-8"));
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), "utf-8"));
 			String line = br.readLine();
 			while(line!=null){
@@ -101,27 +109,43 @@ public class DocumentStorage {
 			String nifContent = body;
 			
 			File fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");
-			if(fil2.exists()){
+			if(fil2!=null && fil2.exists()){
 				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
 			}
-			if(!fil2.createNewFile()){
-				throw new ExternalServiceFailedException("Error at creating the sotrageFile!!!");
+			
+			File newFil2 = new File(fsrDir.getFile(),storageFileName+".niff");
+			if(!newFil2.createNewFile()){
+				throw new ExternalServiceFailedException("Error at creating the NIFF storageFile!!!");
 			}
 
 			Model outModel = ModelFactory.createDefaultModel();
 
 			String documentURI = "";
 			if(prefix==null || prefix.equalsIgnoreCase("")){
-				documentURI = "http://dkt.dfki.de/document/";
+//				documentURI = "http://dkt.dfki.de/document/";
+				documentURI = uriPrefix;
 			}
 			else{
 				documentURI = prefix;
 			}
-			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
+//			System.out.println(storageFileName.length());
+//			int zeroAdditionNumber = 8-storageFileName.length()%8;
+//			System.out.println(zeroAdditionNumber);
+//			while(zeroAdditionNumber>0){
+//				storageFileName += "\0";
+//				zeroAdditionNumber--;
+//			}
+//			
+//			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
+			documentURI = documentURI + "" + storageFileName;
+			System.out.println(documentURI);
 			NIFWriter.addInitialString(outModel, nifContent, documentURI);
 			
-			outModel = outModel.write(new FileOutputStream(fil2), "RDF/XML");
-			return outModel.toString();
+			StringWriter sw = new StringWriter();
+			outModel = outModel.write(new FileOutputStream(newFil2), "RDF/XML");
+			outModel = outModel.write(sw, "RDF/XML");
+			return sw.toString();
+//			return null;
 		}
 		catch(TikaException e){
 			e.printStackTrace();
@@ -231,6 +255,8 @@ public class DocumentStorage {
 		
 //		System.out.println(DocumentStorage.storeTriplet("triplet2", "http://dkt.dfki.de/file2.txt", "http://dkt.dfki.de/ontology#isPartOf", "http://dkt.dfki.de/file3.txt", ""));
 //		System.out.println(DocumentStorage.retrieveTriplets("triplet2", null, null, null));
-	
+
+		System.out.println(DocumentStorage.storeFileByPath("prueba101.txt", "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docs/prueba101.txt", "http://jmschnei.dfki.de/documents/"));
+
 	}
 }

@@ -46,6 +46,7 @@ public class EDocumentStorageServiceStandAlone extends BaseRestController {
 	public ResponseEntity<String> storeData(
 			@RequestParam(value = "storageFileName", required = false) String storageFileName,
 			@RequestParam(value = "inputFilePath", required = false) String inputFilePath,
+			@RequestParam(value = "preffix", required = false) String preffix,
             @RequestBody(required = false) String postBody) throws Exception {
 
 		EDocumentStorageService.checkNotNullOrEmpty(inputFilePath, "input data type");
@@ -54,7 +55,7 @@ public class EDocumentStorageServiceStandAlone extends BaseRestController {
 		//TODO Something with the NIF things.
 		
         try {
-        	return service.storeFileByPath(storageFileName, inputFilePath);
+        	return service.storeFileByPath(storageFileName, inputFilePath, preffix);
         } catch (BadRequestException e) {
             throw e;
         } catch (ExternalServiceFailedException e) {
@@ -65,6 +66,7 @@ public class EDocumentStorageServiceStandAlone extends BaseRestController {
 	@RequestMapping(value = "/e-documentstorage/storeFile", method = { RequestMethod.PUT })
 	public ResponseEntity<String> storeData(
 			@RequestParam(value = "storageFileName", required = false) String storageFileName,
+			@RequestParam(value = "preffix", required = false) String preffix,
             @RequestBody(required = false) String postBody) throws Exception {
 
 		EDocumentStorageService.checkNotNullOrEmpty(postBody, "body content");
@@ -82,7 +84,7 @@ public class EDocumentStorageServiceStandAlone extends BaseRestController {
 	    bw.close();
 	    
         try {
-        	return service.storeFileByFile(storageFileName, tempFile);
+        	return service.storeFileByFile(storageFileName, tempFile, preffix);
         } catch (BadRequestException e) {
             throw e;
         } catch (ExternalServiceFailedException e) {
