@@ -51,7 +51,78 @@ public class DocumentStorage {
 	public DocumentStorage(String storageDirectory, String uriPrefix){
 		this.storageDirectory = storageDirectory;
 	}
-	
+
+	public static String storeFileByString(String storageFileName, String content, String prefix) throws ExternalServiceFailedException {
+		try{
+			File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
+			if(fil!=null && fil.exists()){
+				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
+			}
+			
+			FileSystemResource fsrDir = new FileSystemResource(storageDirectory);
+			File newFil = new File(fsrDir.getFile(),storageFileName);
+			if(!newFil.exists()){
+				if(!newFil.createNewFile()){
+					throw new ExternalServiceFailedException("Error at creating the storageFile!!!");
+				}
+			}
+			
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFil), "utf-8"));
+			bw.write(content);
+			bw.close();
+
+			String nifContent = content;
+			
+			File fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");
+			if(fil2!=null && fil2.exists()){
+				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
+			}
+			
+			File newFil2 = new File(fsrDir.getFile(),storageFileName+".niff");
+			if(!newFil2.createNewFile()){
+				throw new ExternalServiceFailedException("Error at creating the NIFF storageFile!!!");
+			}
+
+			Model outModel = ModelFactory.createDefaultModel();
+
+			String documentURI = "";
+			if(prefix==null || prefix.equalsIgnoreCase("")){
+//				documentURI = "http://dkt.dfki.de/document/";
+				documentURI = uriPrefix;
+			}
+			else{
+				documentURI = prefix;
+			}
+//			System.out.println(storageFileName.length());
+//			int zeroAdditionNumber = 8-storageFileName.length()%8;
+//			System.out.println(zeroAdditionNumber);
+//			while(zeroAdditionNumber>0){
+//				storageFileName += "\0";
+//				zeroAdditionNumber--;
+//			}
+//			
+//			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
+			documentURI = documentURI + "" + storageFileName;
+			System.out.println(documentURI);
+			NIFWriter.addInitialString(outModel, nifContent, documentURI);
+			
+			StringWriter sw = new StringWriter();
+			outModel = outModel.write(new FileOutputStream(newFil2), "RDF/XML");
+			outModel = outModel.write(sw, "RDF/XML");
+			return sw.toString();
+//			return null;
+
+		}
+		catch(FileNotFoundException e){
+			e.printStackTrace();
+			throw new ExternalServiceFailedException(e.getMessage());
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			throw new ExternalServiceFailedException(e.getMessage());
+		}
+	}
+
 	public static String storeFileByPath(String storageFileName, String inputFileName, String prefix) throws ExternalServiceFailedException {
 		try{
 			File inputFil = FileFactory.generateFileInstance(inputFileName);

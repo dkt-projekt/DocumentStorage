@@ -19,6 +19,22 @@ import eu.freme.broker.edocumentstorage.modules.DocumentStorage;
 @Component
 public class EDocumentStorageService {
 	
+    public ResponseEntity<String> storeFileByString(String storageName, String content, String preffix)
+            throws ExternalServiceFailedException, BadRequestException {
+        try {
+        	EDocumentStorageService.checkNotNullOrEmpty(storageName, "storage");
+        	EDocumentStorageService.checkNotNullOrEmpty(content, "content");
+        	
+       		String nifResult = DocumentStorage.storeFileByString(storageName, content, preffix);
+       		
+           	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
+        } catch (BadRequestException e) {
+            throw e;
+    	} catch (ExternalServiceFailedException e2) {
+    		throw e2;
+    	}
+    }
+
     public ResponseEntity<String> storeFileByPath(String storageName, String inputFilePath, String preffix)
             throws ExternalServiceFailedException, BadRequestException {
         try {
