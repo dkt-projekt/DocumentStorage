@@ -25,10 +25,10 @@ import eu.freme.broker.tools.StarterHelper;
 
 @SpringBootApplication
 @Import(EDocumentStorageConfig.class)
-public class Starter {
+public class EDocStorageStarter {
     public static void main(String[] args) {
 		String[] newArgs = StarterHelper.addProfile(args, "broker");
 
-        SpringApplication.run(Starter.class, newArgs);
+        SpringApplication.run(EDocStorageStarter.class, newArgs);
     }
 }
