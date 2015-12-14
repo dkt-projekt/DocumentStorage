@@ -38,7 +38,9 @@ import eu.freme.broker.niftools.NIFWriter;
 public class DocumentStorage {
 
 //	private static String storageDirectory = "C:\\Users\\jmschnei\\Desktop\\dkt-test\\docStorage\\";
-	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docstorage/";
+//	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docstorage/";
+	private static String storageDirectory="/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage/";
+
 	private static String uriPrefix = "http://dkt.dfki.de/storage/document/";
 
 	static String IV = "AAAAAAAAAAAAAAAA";
