@@ -1,8 +1,7 @@
-package eu.freme.broker.edocumentstorage.modules;
+package de.dkt.eservices.edocumentstorage;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,9 +26,9 @@ import org.xml.sax.SAXException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import eu.freme.broker.edocumentstorage.exceptions.ExternalServiceFailedException;
 import eu.freme.broker.filemanagement.FileFactory;
-import eu.freme.broker.niftools.NIFWriter;
+////import eu.freme.broker.niftools.NIFWriter;
+import eu.freme.common.exception.ExternalServiceFailedException;
 
 /**
  * @author Julian Moreno Schneider julian.moreno_schneider@dfki.de
@@ -106,7 +105,7 @@ public class DocumentStorage {
 //			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
 			documentURI = documentURI + "" + storageFileName;
 			System.out.println(documentURI);
-			NIFWriter.addInitialString(outModel, nifContent, documentURI);
+////			NIFWriter.addInitialString(outModel, nifContent, documentURI);
 			
 			StringWriter sw = new StringWriter();
 			outModel = outModel.write(new FileOutputStream(newFil2), "RDF/XML");
@@ -212,7 +211,7 @@ public class DocumentStorage {
 //			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
 			documentURI = documentURI + "" + storageFileName;
 			System.out.println(documentURI);
-			NIFWriter.addInitialString(outModel, nifContent, documentURI);
+////			NIFWriter.addInitialString(outModel, nifContent, documentURI);
 			
 			StringWriter sw = new StringWriter();
 			outModel = outModel.write(new FileOutputStream(newFil2), "RDF/XML");

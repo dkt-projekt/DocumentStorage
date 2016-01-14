@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.dkt</groupId>
-  <artifactId>DocumentStorage</artifactId>
+  <artifactId>DocumentStorageUpdated</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>DocumentStorage</name>
+  <name>DocumentStorageUpdated</name>
   <description>Web service for document storage</description>
   
     <properties>
@@ -13,90 +13,27 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.2.5.RELEASE</version>
-	</parent>
-
-  
-  <dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-	        <exclusions>
-        	    <exclusion>
-    	    	    <groupId>org.springframework.boot</groupId>
-	            	<artifactId>spring-boot-starter-logging</artifactId>
-            	</exclusion>
-    		</exclusions>
-		</dependency>
-	    <dependency>
-    	    <groupId>org.springframework.boot</groupId>
-        	<artifactId>spring-boot-starter-log4j</artifactId>
-	        <exclusions>
-				<exclusion> 
-			        <groupId>org.slf4j</groupId>
-			        <artifactId>slf4j-log4j12</artifactId>
-			    </exclusion>
-	        </exclusions>
-	    </dependency>
-		<dependency>
-			<groupId>com.mashape.unirest</groupId>
-			<artifactId>unirest-java</artifactId>
-			<version>1.4.6</version>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-core</artifactId>
-			<version>2.11.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-arq</artifactId>
-			<version>2.11.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.opennlp</groupId>
-			<artifactId>opennlp-tools</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.freme</groupId>
-			<artifactId>Broker</artifactId>
-			<version>0.4-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-simple</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>eu.freme</groupId>
-			<artifactId>common</artifactId>
-			<version>0.4-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-simple</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>		
-		<dependency>
-			<groupId>de.dkt</groupId>
-			<artifactId>FileManagement</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>DKTCommon</groupId>
-			<artifactId>DKTCommon</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+  <parent>
+  	<groupId>eu.freme.e-services</groupId>
+  	<artifactId>e-service-parent</artifactId>
+  	<version>0.1-SNAPSHOT</version>
+  </parent>
+    <dependencies>
+  	<dependency>
+  		<groupId>eu.freme.bservices</groupId>
+  		<artifactId>test-helper</artifactId>
+  		<version>0.1-SNAPSHOT</version>
+  	</dependency>
+	<dependency>
+		<groupId>de.dkt</groupId>
+		<artifactId>FileManagement</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>de.dkt</groupId>
+		<artifactId>DKTCommonUpdate</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
 		<dependency>
 		    <groupId>org.apache.tika</groupId>
 		    <artifactId>tika-core</artifactId>
@@ -107,7 +44,13 @@
 		    <artifactId>tika-parsers</artifactId>
 		    <version>1.11</version>
 	  </dependency>
-  </dependencies>	
+<dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpcore</artifactId>
+    <version>4.4.1</version>
+</dependency>
+
+  </dependencies>
 	<repositories>
 		<repository>
 			<id>freme-release</id>

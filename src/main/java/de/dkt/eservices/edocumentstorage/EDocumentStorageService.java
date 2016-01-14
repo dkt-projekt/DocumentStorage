@@ -1,4 +1,4 @@
-package eu.freme.broker.edocumentstorage.api;
+package de.dkt.eservices.edocumentstorage;
 
 import java.io.File;
 
@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import eu.freme.broker.edocumentstorage.exceptions.BadRequestException;
-import eu.freme.broker.edocumentstorage.exceptions.ExternalServiceFailedException;
-import eu.freme.broker.edocumentstorage.modules.DocumentStorage;
+import eu.freme.common.exception.BadRequestException;
+import eu.freme.common.exception.ExternalServiceFailedException;
+
 
 /**
  * @author Julian Moreno Schneider julian.moreno_schneider@dfki.de
