@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import eu.freme.broker.filemanagement.FileFactory;
+import de.dkt.common.filemanagement.FileFactory;
 ////import eu.freme.broker.niftools.NIFWriter;
 import eu.freme.common.exception.ExternalServiceFailedException;
 
