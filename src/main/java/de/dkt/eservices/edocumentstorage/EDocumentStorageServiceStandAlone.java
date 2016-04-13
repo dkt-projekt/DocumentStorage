@@ -1,10 +1,12 @@
-package eu.freme.broker.edocumentstorage.api;
+package de.dkt.eservices.edocumentstorage;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,14 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import eu.freme.broker.edocumentstorage.exceptions.BadRequestException;
-import eu.freme.broker.edocumentstorage.exceptions.ExternalServiceFailedException;
-import eu.freme.broker.eservices.BaseRestController;
-import eu.freme.broker.tools.ExceptionHandlerService;
-import eu.freme.broker.tools.NIFParameterFactory;
-import eu.freme.broker.tools.RDFELinkSerializationFormats;
-import eu.freme.broker.tools.RDFSerializationFormats;
-import eu.freme.common.conversion.rdf.RDFConversionService;
+import eu.freme.common.exception.BadRequestException;
+import eu.freme.common.exception.ExternalServiceFailedException;
+import eu.freme.common.rest.BaseRestController;
 
 @RestController
 public class EDocumentStorageServiceStandAlone extends BaseRestController {
@@ -27,21 +24,32 @@ public class EDocumentStorageServiceStandAlone extends BaseRestController {
 	@Autowired
 	EDocumentStorageService service;
 	
-	@Autowired
-	RDFConversionService rdfConversionService;
+//	@Autowired
+//	RDFConversionService rdfConversionService;
+//
+//	@Autowired
+//	NIFParameterFactory nifParameterFactory;
+//
+//	@Autowired
+//	RDFSerializationFormats rdfSerializationFormats;
+//
+//	@Autowired
+//	RDFELinkSerializationFormats rdfELinkSerializationFormats;
+//	
+//	@Autowired
+//	ExceptionHandlerService exceptionHandlerService;
 
-	@Autowired
-	NIFParameterFactory nifParameterFactory;
+	@RequestMapping(value = "/e-documentstorage/testURL", method = { RequestMethod.POST, RequestMethod.GET })
+	public ResponseEntity<String> testURL(
+			@RequestParam(value = "preffix", required = false) String preffix,
+            @RequestBody(required = false) String postBody) throws Exception {
 
-	@Autowired
-	RDFSerializationFormats rdfSerializationFormats;
-
-	@Autowired
-	RDFELinkSerializationFormats rdfELinkSerializationFormats;
+    	HttpHeaders responseHeaders = new HttpHeaders();
+    	responseHeaders.add("Content-Type", "text/plain");
+    	ResponseEntity<String> response = new ResponseEntity<String>("The restcontroller is working properly", responseHeaders, HttpStatus.OK);
+    	return response;
+	}
 	
-	@Autowired
-	ExceptionHandlerService exceptionHandlerService;
-
 	@RequestMapping(value = "/e-documentstorage/storeFile", method = { RequestMethod.POST, RequestMethod.GET })
 	public ResponseEntity<String> storeData(
 			@RequestParam(value = "storageFileName", required = false) String storageFileName,
