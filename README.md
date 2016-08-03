@@ -32,7 +32,7 @@ Example cURL post for creating a collection:
 `curl -X POST "http://api.digitale-kuratierung.de/api/e-documentstorage/collection/testcollection?private=true&user=dkt-projekt&users=pebo01,ansr01"`
 
 
-##Getting and overview of the collection
+##Getting an overview of the collection
 
 ### Endpoint
 
