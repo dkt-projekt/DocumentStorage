@@ -11,22 +11,35 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.sax.ToXMLContentHandler;
+import org.json.JSONObject;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
+import de.dkt.common.exceptions.LoggedExceptions;
 import de.dkt.common.filemanagement.FileFactory;
+import de.dkt.common.niftools.NIFReader;
+import de.dkt.common.niftools.NIFWriter;
+import de.dkt.eservices.edocumentstorage.ddbb.Collection;
+import eu.freme.common.conversion.rdf.RDFConstants.RDFSerialization;
 ////import eu.freme.broker.niftools.NIFWriter;
 import eu.freme.common.exception.ExternalServiceFailedException;
 
@@ -34,208 +47,441 @@ import eu.freme.common.exception.ExternalServiceFailedException;
  * @author Julian Moreno Schneider julian.moreno_schneider@dfki.de
  *
  */
+@Component
 public class DocumentStorage {
+
+	Logger logger = Logger.getLogger(DocumentStorage.class);
 
 //	private static String storageDirectory = "C:\\Users\\jmschnei\\Desktop\\dkt-test\\docStorage\\";
 //	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docstorage/";
-	private static String storageDirectory="/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage/";
+	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage/";
 
-	private static String uriPrefix = "http://dkt.dfki.de/storage/document/";
+	private static String websiteDirectory = "/var/www/html/data/dkt-documents/collectionName/";
+
+	private static String collectionsInformationFile = "collectionInformationFile.txt";
+	
+	private static String uriPrefix = "http://dkt.dfki.de/storage/collection";
 
 	static String IV = "AAAAAAAAAAAAAAAA";
 	static String plaintext = "test text 123\0\0\0";
 	static String encryptionKey = "0123456789abcdef";
-	  
+
+	
+	private HashMap<String,Collection> collections;
+	
 	public DocumentStorage(){
+		initializeCollectionsInformation();
 	}
 	
 	public DocumentStorage(String storageDirectory, String uriPrefix){
 		this.storageDirectory = storageDirectory;
+		initializeCollectionsInformation();
 	}
 
-	public static String storeFileByString(String storageFileName, String content, String prefix) throws ExternalServiceFailedException {
+	public boolean initializeCollectionsInformation(){
 		try{
-			File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
-			if(fil!=null && fil.exists()){
-				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
-			}
-			
-			FileSystemResource fsrDir = new FileSystemResource(storageDirectory);
-			File newFil = new File(fsrDir.getFile(),storageFileName);
-			if(!newFil.exists()){
-				if(!newFil.createNewFile()){
-					throw new ExternalServiceFailedException("Error at creating the storageFile!!!");
-				}
-			}
-			
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFil), "utf-8"));
-			bw.write(content);
-			bw.close();
-
-			String nifContent = content;
-			
-			File fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");
-			if(fil2!=null && fil2.exists()){
-				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
-			}
-			
-			File newFil2 = new File(fsrDir.getFile(),storageFileName+".niff");
-			if(!newFil2.createNewFile()){
-				throw new ExternalServiceFailedException("Error at creating the NIFF storageFile!!!");
-			}
-
-			Model outModel = ModelFactory.createDefaultModel();
-
-			String documentURI = "";
-			if(prefix==null || prefix.equalsIgnoreCase("")){
-//				documentURI = "http://dkt.dfki.de/document/";
-				documentURI = uriPrefix;
-			}
-			else{
-				documentURI = prefix;
-			}
-//			System.out.println(storageFileName.length());
-//			int zeroAdditionNumber = 8-storageFileName.length()%8;
-//			System.out.println(zeroAdditionNumber);
-//			while(zeroAdditionNumber>0){
-//				storageFileName += "\0";
-//				zeroAdditionNumber--;
-//			}
-//			
-//			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
-			documentURI = documentURI + "" + storageFileName;
-			System.out.println(documentURI);
-////			NIFWriter.addInitialString(outModel, nifContent, documentURI);
-			
-			StringWriter sw = new StringWriter();
-			outModel = outModel.write(new FileOutputStream(newFil2), "RDF/XML");
-			outModel = outModel.write(sw, "RDF/XML");
-			return sw.toString();
-//			return null;
-
-		}
-		catch(FileNotFoundException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-		catch(IOException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-	}
-
-	public static String storeFileByPath(String storageFileName, String inputFileName, String prefix) throws ExternalServiceFailedException {
-		try{
-			File inputFil = FileFactory.generateFileInstance(inputFileName);
-			
-			return storeFileByFile(storageFileName, inputFil, prefix);
-		}
-		catch(FileNotFoundException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-		catch(IOException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-	}
-
-	public static String storeFileByFile(String storageFileName, File inputFile, String prefix) throws ExternalServiceFailedException {
-		try{
-			File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
-			if(fil!=null && fil.exists()){
-				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
-			}
-			
-			FileSystemResource fsrDir = new FileSystemResource(storageDirectory);
-			File newFil = new File(fsrDir.getFile(),storageFileName);
-			if(!newFil.exists()){
-				if(!newFil.createNewFile()){
-					throw new ExternalServiceFailedException("Error at creating the storageFile!!!");
-				}
-			}
-			
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newFil), "utf-8"));
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile), "utf-8"));
+			collections = new HashMap<String, Collection>();
+			BufferedReader br = FileFactory.generateBufferedReaderInstance(collectionsInformationFile, "utf-8");
+			String content = "";
 			String line = br.readLine();
 			while(line!=null){
-				bw.write(line + "\n");
+				content += line + "\n";
 				line = br.readLine();
 			}
 			br.close();
-			bw.close();
-
-			AutoDetectParser parser = new AutoDetectParser();
-//		    BodyContentHandler handler = new BodyContentHandler();
-		    ToXMLContentHandler handler = new ToXMLContentHandler();
-		    Metadata metadata = new Metadata();
-			InputStream stream = new FileInputStream(inputFile);
-			String body = "";
-		    try{
-		        parser.parse(stream, handler, metadata);
-		        body = handler.toString();
-			} finally {
-			    stream.close();            // close the stream
+			JSONObject collectionsJSON = new JSONObject(content);
+			JSONObject colsJSON = collectionsJSON.getJSONObject("collections");
+			Set<String> jsonKeys = colsJSON.keySet();
+			for (String jk : jsonKeys) {
+				JSONObject collec = colsJSON.getJSONObject(jk);
+				Collection c = new Collection(collec);
+				collections.put(c.getCollectionName(), c);
 			}
-
-			String nifContent = body;
-			
-			File fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");
-			if(fil2!=null && fil2.exists()){
-				throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
-			}
-			
-			File newFil2 = new File(fsrDir.getFile(),storageFileName+".niff");
-			if(!newFil2.createNewFile()){
-				throw new ExternalServiceFailedException("Error at creating the NIFF storageFile!!!");
-			}
-
-			Model outModel = ModelFactory.createDefaultModel();
-
-			String documentURI = "";
-			if(prefix==null || prefix.equalsIgnoreCase("")){
-//				documentURI = "http://dkt.dfki.de/document/";
-				documentURI = uriPrefix;
-			}
-			else{
-				documentURI = prefix;
-			}
-//			System.out.println(storageFileName.length());
-//			int zeroAdditionNumber = 8-storageFileName.length()%8;
-//			System.out.println(zeroAdditionNumber);
-//			while(zeroAdditionNumber>0){
-//				storageFileName += "\0";
-//				zeroAdditionNumber--;
-//			}
-//			
-//			documentURI = documentURI + "" + encrypt(storageFileName, encryptionKey);
-			documentURI = documentURI + "" + storageFileName;
-			System.out.println(documentURI);
-////			NIFWriter.addInitialString(outModel, nifContent, documentURI);
-			
-			StringWriter sw = new StringWriter();
-			outModel = outModel.write(new FileOutputStream(newFil2), "RDF/XML");
-			outModel = outModel.write(sw, "RDF/XML");
-			return sw.toString();
-//			return null;
-		}
-		catch(TikaException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-		catch(SAXException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-		catch(FileNotFoundException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
+			return true;
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
+			return false;
 		}
 	}
+
+	public boolean updateCollectionsInformation(){
+		try{
+			JSONObject colsJSON = new JSONObject();
+			Set<String> keys = collections.keySet();
+			for (String k : keys) {
+				colsJSON.append(k, collections.get(k).getJSONObject());
+			}
+			JSONObject collectionsJSON = new JSONObject();
+			collectionsJSON.append("collections", colsJSON);
+			
+	
+			BufferedWriter bw = FileFactory.generateBufferedWriterInstance(collectionsInformationFile, "utf-8", false);
+			bw.write(collectionsJSON.toString());
+			bw.close();
+			return true;
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public String storeCollection(String collectionName, String user, boolean priv, String sUsers) throws ExternalServiceFailedException {
+        try {
+        	String prefix = "";
+        	
+        	String collectionFile = collectionName+".cfe";
+   			File fil = FileFactory.generateFileInstance(storageDirectory+collectionFile);//cfe means collection file extension
+   			if(fil!=null && fil.exists()){
+        		throw LoggedExceptions.generateLoggedBadRequestException(logger,"There is a file with the same name, please rename it!!!");
+        	}
+   			File fsrDir = FileFactory.generateFileInstance(storageDirectory);
+   			File newFil = new File(fsrDir,collectionFile);
+   			if(!newFil.exists()){
+   				if(!newFil.createNewFile()){
+   	        		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"Error at creating the storageFile!!!");
+   				}
+   			}
+
+   			String collectionURI = "";
+   			if(prefix==null || prefix.equalsIgnoreCase("")){
+   				//        				documentURI = "http://dkt.dfki.de/document/";
+   				int cnt = collections.size();
+   				collectionURI = uriPrefix+cnt+"/";
+   			}
+   			else{
+   				collectionURI = prefix;
+   			}
+   			Model outModel = NIFManagement.createDefaultCollectionModel(collectionURI);
+   			////        			NIFWriter.addInitialString(outModel, nifContent, documentURI);
+ //  			StringWriter sw = new StringWriter();
+   			outModel = outModel.write(new FileOutputStream(newFil), "RDF/XML");
+//   			outModel = outModel.write(sw, "RDF/XML");
+//   			return sw.toString();
+
+   			List<String> users = new LinkedList<String>();
+   			users.add(user);
+   			for (String k : sUsers.split(",")) {
+				users.add(k);
+			}
+   			List<String> documents = new LinkedList<String>();
+   			Collection c = new Collection(collectionName, priv, users, documents, newFil.getAbsolutePath());
+   			collections.put(collectionName, c);
+   			updateCollectionsInformation();
+   			return collectionName;
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+        }
+	}
+
+	public List<Model> listCollections(String user) throws ExternalServiceFailedException {
+        try {
+        	List<Model> list = new LinkedList<Model>();
+   			File fsrDir = FileFactory.generateFileInstance(storageDirectory);
+   			if(!fsrDir.exists()){
+   				throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"There is no Storage Directory to find collections!");
+   			}
+
+   			File[] collectionFiles = fsrDir.listFiles();
+   			for (File f : collectionFiles) {
+   				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "utf-8"));
+   				String line = br.readLine();
+   				String content = "";
+   				while(line!=null){
+   					content += line + "\n";
+   					line = br.readLine();
+   				}
+   				br.close();
+   				
+   				Model aux = NIFReader.extractModelFromFormatString(content, RDFSerialization.TURTLE);
+   				list.add(aux);
+			}
+        	return list;
+    	} catch (Exception e) {
+    		e.printStackTrace();
+        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+    	}
+	}
+
+	public Model getCollection(String collectionName) throws ExternalServiceFailedException {
+        try {
+        	String collectionFile = collectionName+".cfe";
+   			File colFil = FileFactory.generateFileInstance(storageDirectory + collectionFile);
+   			if(!colFil.exists()){
+   				throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"There is no collection with this name.");
+   			}
+
+   			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(colFil), "utf-8"));
+   			String line = br.readLine();
+   			String content = "";
+   			while(line!=null){
+   				content += line + "\n";
+   				line = br.readLine();
+   			}
+   			br.close();
+
+   			Model collectionModel = NIFReader.extractModelFromFormatString(content, RDFSerialization.TURTLE);
+        	return collectionModel;
+    	} catch (Exception e) {
+    		e.printStackTrace();
+        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+    	}
+	}
+
+	public String getCollectionOverview(String collectionName) throws ExternalServiceFailedException {
+        try {
+    		Collection c = collections.get(collectionName);
+    		if(c!=null){
+    			return c.getJSONObject().toString();
+    		}
+        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "There is no collection with this name");
+    	} catch (Exception e) {
+    		e.printStackTrace();
+        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+    	}
+	}
+
+	public String deleteCollection(String collectionName, String user) throws ExternalServiceFailedException {
+		if(checkCollectionPermision(collectionName, user)){
+			try{
+		    	String collectionFile = collectionName+".cfe";
+				File colFil = FileFactory.generateFileInstance(storageDirectory + collectionFile);
+				if(!colFil.exists()){
+					throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"There is no collection with this name.");
+				}
+				Model m = getCollection(collectionName);
+				if(!colFil.delete()){
+					throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"There was a problem deleting the collection file.");
+				}
+				return NIFReader.model2String(m, "TTL");
+	    	} catch (Exception e) {
+	    		e.printStackTrace();
+	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+	    	}
+		}
+		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to delete this document.");
+	}
+
+	public String updateCollection(String collectionName, String user) {
+		if(checkCollectionPermision(collectionName, user)){
+			//TODO we still have to define what means updating a collection.
+		}
+		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to delete this document.");
+	}
+
+	public boolean checkCollectionPermision(String collectionName, String user) {
+		Collection c = collections.get(collectionName);
+		if(c!=null){
+			if(!c.isPriv() || c.getUsers().contains(user)){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		else{
+			return false;
+		}
+	}
+
+//	public boolean checkDocumentPermision(String documentName, String user) {
+//       	return parrotDAO.checkDocumentPermission(null,documentName,user);
+//	}
+//	
+//	
+	
+//	public String storeDocument(String documentName, String collection, String user, String type, String content, String path) throws ExternalServiceFailedException {
+//	try {
+//		String documentURI = "";
+//		
+//		//TODO Generate JENA model for file and store current file and content. 
+//		
+//		
+//		
+//		
+//		return documentURI;
+//	} catch (Exception e) {
+//    	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+//	}
+//}
+//
+
+	public String storeDocument(String collectionName, String user, File inputFile) throws ExternalServiceFailedException {
+		if(checkCollectionPermision(collectionName, user)){
+			try{
+				String storageFileName = inputFile.getName();
+				File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
+				if(fil!=null && fil.exists()){
+					throw new ExternalServiceFailedException("There is a file with the same name, please rename it!");
+				}
+				if(!fil.exists()){
+					if(!fil.createNewFile()){
+						throw new ExternalServiceFailedException("Error at creating the storageFile!!!");
+					}
+				}
+
+				FileUtils.copyFile(inputFile, fil);
+
+				AutoDetectParser parser = new AutoDetectParser();
+				//BodyContentHandler handler = new BodyContentHandler();
+				ToXMLContentHandler handler = new ToXMLContentHandler();
+				Metadata metadata = new Metadata();
+				InputStream stream = new FileInputStream(inputFile);
+				String body = "";
+				try{
+					parser.parse(stream, handler, metadata);
+					body = handler.toString();
+				} finally {
+					stream.close();            // close the stream
+				}
+
+				Model collectionModel = getCollection(collectionName);
+	   			String documentURI = NIFManagement.extractCollectionURI(collectionModel)+"/document"+collections.get(collectionName).getDocuments().size();
+				Model documentModel = NIFManagement.createDocumentModel(collectionModel, documentURI, documentURI);
+//				NIFManagement.addDocumentToCollection(collectionModel, documentModel);
+
+	   			collections.get(collectionName).addDocument(documentURI);
+	   			updateCollectionsInformation();
+
+/**	
+ * 
+ * 	This part is only needed if we want to store also the document into a separate NIF file.
+
+				String nifContent = body;
+
+				File fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");
+				if(fil2!=null && fil2.exists()){
+					throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
+				}
+				if(!fil2.createNewFile()){
+					throw new ExternalServiceFailedException("Error at creating the NIF storageFile!!!");
+				}
+*/
+				StringWriter sw = new StringWriter();
+	   			documentModel = documentModel.write(sw, "RDF/XML");
+				return sw.toString();
+			}
+//			catch(TikaException|SAXException|FileNotFoundException e){
+//				e.printStackTrace();
+//				throw new ExternalServiceFailedException(e.getMessage());
+//			}
+			catch(Exception e){
+				e.printStackTrace();
+				throw new ExternalServiceFailedException(e.getMessage());
+			}
+		}
+		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to delete this document.");
+	}
+
+	public boolean updateDocument(String documentName, String collectionName, String user, File inputFile) throws ExternalServiceFailedException {
+//		if(checkCollectionPermision(collectionName, user)){
+//			try {
+//				String storageFileName = inputFile.getName();
+//				File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
+//				if(fil!=null && fil.exists()){
+//					throw new ExternalServiceFailedException("There is a file with the same name, please rename it!");
+//				}
+//				if(!fil.exists()){
+//					if(!fil.createNewFile()){
+//						throw new ExternalServiceFailedException("Error at creating the storageFile!!!");
+//					}
+//				}
+//
+//				FileUtils.copyFile(inputFile, fil);
+//
+//				AutoDetectParser parser = new AutoDetectParser();
+//				//			    BodyContentHandler handler = new BodyContentHandler();
+//				ToXMLContentHandler handler = new ToXMLContentHandler();
+//				Metadata metadata = new Metadata();
+//				InputStream stream = new FileInputStream(inputFile);
+//				String body = "";
+//				try{
+//					parser.parse(stream, handler, metadata);
+//					body = handler.toString();
+//				} finally {
+//					stream.close();            // close the stream
+//				}
+//
+//				Model collectionModel = getCollection(collectionName);
+//	   			String documentURI = NIFManagement.extractCollectionURI(collectionModel)+"/document"+collections.get(collectionName).getDocuments().size();
+//				Model documentModel = NIFManagement.createDocumentModel(collectionModel, documentName, documentURI);
+////				NIFManagement.addDocumentToCollection(collectionModel, documentModel);
+//
+//	   			collections.get(collectionName).addDocument(documentName);
+//	   			updateCollectionsInformation();
+//
+//	   			
+//	   			return NIFManagement.updateDocument(collectionModel, documentName, inputFile);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+//			}
+//		}
+//		throw new ExternalServiceFailedException("The user has not permission to read this document.");
+		return true;
+    }
+	
+	public Model getDocument(String documentName, String collectionName, String user) throws ExternalServiceFailedException {
+		if(checkCollectionPermision(collectionName, user)){
+			try {
+	   			Model collectionModel = getCollection(collectionName);//NIFReader.extractModelFromFormatString(content, RDFSerialization.TURTLE);
+	   			Model documentModel = NIFManagement.extractDocumentModel(collectionModel,documentName);
+				return documentModel;
+			} catch (Exception e) {
+				e.printStackTrace();
+	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+			}
+		}
+		throw new ExternalServiceFailedException("The user has not permission to read this document.");
+	}
+	
+	public List<Model> listDocuments(String collectionName,String userName) throws ExternalServiceFailedException {
+        try {
+        	Model collection = getCollection(collectionName);
+        	List<Model> documents = NIFManagement.extractDocumentsModels(collection); 
+        	return documents;
+    	} catch (Exception e) {
+    		e.printStackTrace();
+        	logger.error(e.getMessage());
+    		throw new ExternalServiceFailedException(e.getMessage());
+    	}
+	}
+	
+	public String getFileContent(String collectionName, String user, String documentName) throws ExternalServiceFailedException {
+		if(checkCollectionPermision(collectionName, user)){
+			try {
+	   			Model documentModel = getDocument(documentName, collectionName, user);
+	   			String filePath = NIFManagement.extractSourceFilePath(documentModel);
+				return filePath;
+			} catch (Exception e) {
+				e.printStackTrace();
+	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+			}
+		}
+		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to read this document.");
+	}
+
+	public String deleteDocument(String collectionName, String user, String documentName) {
+		if(checkCollectionPermision(collectionName, user)){
+			try {
+				Model collectionModel = getCollection(collectionName);
+				Model documentModel = NIFManagement.deleteDocument(documentName, collectionModel);
+				return NIFReader.model2String(documentModel, "TTL");
+			} catch (Exception e) {
+				e.printStackTrace();
+	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+			}
+		}
+		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to read this document.");
+	}
+
+	
+	
+	
+	
+	
 
 	public static byte[] encrypt(String plainText, String encryptionKey) throws Exception {
 		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "SunJCE");
@@ -281,30 +527,6 @@ public class DocumentStorage {
 		}
 	}
 
-	public static String getFileContent(String storageFileName) throws ExternalServiceFailedException {
-		try{
-			File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
-
-			String total = "";
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fil), "utf-8"));
-			String line = br.readLine();
-			while(line!=null){
-				total = total + "\n" + line;
-				line = br.readLine();
-			}
-			br.close();
-			return total;
-		}
-		catch(FileNotFoundException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-		catch(IOException e){
-			e.printStackTrace();
-			throw new ExternalServiceFailedException(e.getMessage());
-		}
-	}
-
 	public static File getFile(String storageFileName) throws ExternalServiceFailedException {
 		try{
 			File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
@@ -323,12 +545,4 @@ public class DocumentStorage {
 		}
 	}
 
-	public static void main(String[] args) throws Exception{
-		
-//		System.out.println(DocumentStorage.storeTriplet("triplet2", "http://dkt.dfki.de/file2.txt", "http://dkt.dfki.de/ontology#isPartOf", "http://dkt.dfki.de/file3.txt", ""));
-//		System.out.println(DocumentStorage.retrieveTriplets("triplet2", null, null, null));
-
-		System.out.println(DocumentStorage.storeFileByPath("prueba101.txt", "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docs/prueba101.txt", "http://jmschnei.dfki.de/documents/"));
-
-	}
 }

@@ -1,12 +1,21 @@
 package de.dkt.eservices.edocumentstorage;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import com.hp.hpl.jena.rdf.model.Model;
+
+import de.dkt.common.exceptions.LoggedExceptions;
+import de.dkt.common.niftools.NIFReader;
 import eu.freme.common.exception.BadRequestException;
 import eu.freme.common.exception.ExternalServiceFailedException;
 
@@ -19,84 +28,127 @@ import eu.freme.common.exception.ExternalServiceFailedException;
 @Component
 public class EDocumentStorageService {
 	
-    public ResponseEntity<String> storeFileByString(String storageName, String content, String preffix)
-            throws ExternalServiceFailedException, BadRequestException {
+	Logger logger = Logger.getLogger(EDocumentStorageService.class);
+
+	@Autowired
+	DocumentStorage storageService;
+
+	public String createCollection(String collectionName, String user, boolean priv, String sUsers) throws ExternalServiceFailedException {
+		return storageService.storeCollection(collectionName, user, priv, sUsers);
+	}
+
+//	public String listCollections(String user,int limit){
+//		return listCollectionsJSON(user,limit).toString();
+//	}
+//	
+//	public JSONObject listCollectionsJSON(String user,int limit){
+//		List<Model> collections = storageService.listCollections(user);
+//		List<Model> list2 = new LinkedList<Model>();
+//		if(limit>0){
+//			int counter = 0;
+//			for (Model col: collections) {
+//				if(counter<limit){
+//					list2.add(col);
+//					counter++;
+//				}
+//			}
+//			return NIFManagement.convertCollectionListIntoJSON(list2);
+//		}
+//		else{
+//			return NIFManagement.convertCollectionListIntoJSON(collections);
+//		}
+//	}
+
+	public String getCollectionOverview(String collectionName, String userName){
+		return storageService.getCollectionOverview(collectionName);
+	}
+		
+	public String getCollection(String collectionName, String userName){
+		Model m = storageService.getCollection(collectionName); 
+		return NIFReader.model2String(m, "ttl");
+	}
+		
+	public String updateCollection(String collectionName, String user){
+		return storageService.updateCollection(collectionName,user);
+	}
+
+	public String deleteCollection(String collectionName, String user){
+		return storageService.deleteCollection(collectionName,user);
+	}
+
+	
+	
+	public String listDocuments(String collectionName,String user,int limit){
+		return listDocumentsJSON(collectionName, user, limit).toString();
+	}
+	
+	public JSONObject listDocumentsJSON(String collectionName,String user,int limit){
+		List<Model> documents = storageService.listDocuments(collectionName,user);
+		List<Model> list2 = new LinkedList<Model>();
+		if(limit>0){
+			int counter = 0;
+			for (Model doc: documents) {
+				if(counter<limit){
+					list2.add(doc);
+					counter++;
+				}
+			}
+			return NIFManagement.convertListIntoJSON(list2);
+		}
+		else{
+			return NIFManagement.convertListIntoJSON(documents);
+		}
+
+	}
+
+	public String addDocumentToCollection(String collectionName, String user, File inputFile) {
+		try{
+			String documentIdentifier = storageService.storeDocument(collectionName, user, inputFile);
+			if(documentIdentifier==null){
+				throw LoggedExceptions.generateLoggedBadRequestException(logger,"Error storing the document.");
+			}
+			return documentIdentifier;
+		}
+		catch(Exception e){
+			throw LoggedExceptions.generateLoggedBadRequestException(logger, "User \""+user+"\" has not rights for accessing the collection \""+collectionName+"\"");
+		}
+	}
+	
+	public String getNIFDocument(String documentName, String collectionName, String user) {
+		Model doc = storageService.getDocument(documentName, collectionName, user);
+		return NIFReader.model2String(doc, "TTL");
+	}		
+
+    public String getFileContent(String collectionName, String user, String documentName){
         try {
-        	EDocumentStorageService.checkNotNullOrEmpty(storageName, "storage");
-        	EDocumentStorageService.checkNotNullOrEmpty(content, "content");
-        	
-       		String nifResult = DocumentStorage.storeFileByString(storageName, content, preffix);
-       		
-           	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
-        } catch (BadRequestException e) {
-            throw e;
-    	} catch (ExternalServiceFailedException e2) {
-    		throw e2;
+        	return storageService.getFileContent(collectionName, user, documentName);
+        } catch (Exception e) {
+            throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
     	}
     }
 
-    public ResponseEntity<String> storeFileByPath(String storageName, String inputFilePath, String preffix)
-            throws ExternalServiceFailedException, BadRequestException {
-        try {
-        	EDocumentStorageService.checkNotNullOrEmpty(storageName, "No Storage specified");
-        	EDocumentStorageService.checkNotNullOrEmpty(inputFilePath, "No inputFilePath specified");
-        	
-       		String nifResult = DocumentStorage.storeFileByPath(storageName, inputFilePath, preffix);
-       		
-           	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
-        } catch (BadRequestException e) {
-            throw e;
-    	} catch (ExternalServiceFailedException e2) {
-    		throw e2;
-    	}
-    }
+	public String deleteDocumentByName(String collectionName, String documentName, String user) {
+       	try{
+       		String document = storageService.deleteDocument(collectionName, user, documentName);
+       		return document;
+       	}
+       	catch(Exception e){
+       		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+       	}
+	}
+	
+	public boolean updateDocument(String collectionName, String user, String documentName, File inputFile) {
+		try{
+			return storageService.updateDocument(documentName, collectionName, user, inputFile);
+		}
+		catch(Exception e){
+			throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+		}
+	}
 
-    public ResponseEntity<String> storeFileByFile(String storageName, File inputFile, String preffix)
-            throws ExternalServiceFailedException, BadRequestException {
-        try {
-        	EDocumentStorageService.checkNotNullOrEmpty(storageName, "No Storage specified");
-        	EDocumentStorageService.checkNotNull(inputFile, "No inputFilePath specified");
-        	
-       		String nifResult = DocumentStorage.storeFileByFile(storageName, inputFile, preffix);
-       		
-           	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
-        } catch (BadRequestException e) {
-            throw e;
-    	} catch (ExternalServiceFailedException e2) {
-    		throw e2;
-    	}
-    }
 
-    public ResponseEntity<String> getNifContent(String storageFile)
-            throws ExternalServiceFailedException, BadRequestException {
-        try {
-        	EDocumentStorageService.checkNotNullOrEmpty(storageFile, "stored file");
-
-        	String nifResult = DocumentStorage.getNIFContent(storageFile);
-       		
-           	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
-        } catch (BadRequestException e) {
-            throw e;
-    	} catch (ExternalServiceFailedException e2) {
-    		throw e2;
-    	}
-    }
-
-    public ResponseEntity<String> getFileContent(String storageFile)
-            throws ExternalServiceFailedException, BadRequestException {
-        try {
-        	EDocumentStorageService.checkNotNullOrEmpty(storageFile, "stored file");
-
-        	String nifResult = DocumentStorage.getNIFContent(storageFile);
-       		
-           	return EDocumentStorageService.successResponse(nifResult, "RDF/XML");
-        } catch (BadRequestException e) {
-            throw e;
-    	} catch (ExternalServiceFailedException e2) {
-    		throw e2;
-    	}
-    }
-    
+	
+	
     public static void checkNotNullOrEmpty (String param, String message) throws BadRequestException {
     	if( param==null || param.equals("") ){
             throw new BadRequestException("No "+message+" param specified");
