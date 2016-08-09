@@ -57,7 +57,7 @@ public class DocumentStorage {
 
 //	private static String storageDirectory = "C:\\Users\\jmschnei\\Desktop\\dkt-test\\docStorage\\";
 //	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docstorage/";
-	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage/";
+	protected static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage/";
 
 	private static String websiteDirectory = "/var/www/html/data/dkt-documents/collectionName/";
 

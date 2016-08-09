@@ -100,8 +100,8 @@ public class EDocumentStorageTest {
 				.asString();
 		assertTrue(response.getStatus() == 200);
 		assertTrue(response.getBody().length() > 0);
-		String expected = "{\"private\":false,\"documents\":{},\"filePath\":\"/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage22/testcollection22.cfe\",\"users\":{\"1\":\"dkt-projekt\"},\"collectionName\":\"testcollection22\"}";
-		Assert.assertEquals(expected, response.getBody());
+		String expected = "{\"private\":false,\"documents\":{},\"filePath\":\"URL/testcollection22.cfe\",\"users\":{\"1\":\"dkt-projekt\"},\"collectionName\":\"testcollection22\"}";
+		Assert.assertEquals(expected, response.getBody().replaceFirst("/(.*)/", "URL/"));
 //		System.out.println("BBOODDYY GETO: "+response.getBody());
 
 	}
@@ -180,7 +180,7 @@ public class EDocumentStorageTest {
 "        <http://dkt.dfki.de/ontologies/nif#DocumentName>\n"+
 "                \"docName1\"^^xsd:string ;\n"+
 "        <http://dkt.dfki.de/ontologies/nif#DocumentPath>\n"+
-"                \"/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage22/ds_plaintext_51143.218932217597879828632919911584.txt\"^^xsd:string ;\n"+
+"                \""+DocumentStorage.storageDirectory+"ds_plaintext_51143.218932217597879828632919911584.txt\"^^xsd:string ;\n"+
 "        nif:beginIndex  \"0\"^^xsd:nonNegativeInteger ;\n"+
 "        nif:endIndex    \"53\"^^xsd:nonNegativeInteger ;\n"+
 "        nif:isString    \"test text to put into the document to the collection\\n\"^^xsd:string .\n";
@@ -196,7 +196,7 @@ public class EDocumentStorageTest {
 				.asString();
 		assertTrue(response.getStatus() == 200);
 		assertTrue(response.getBody().length() > 0);
-		String expected = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage22/ds_plaintext_26228.482317365114506372550020066922.txt";
+		String expected = DocumentStorage.storageDirectory+"ds_plaintext_26228.482317365114506372550020066922.txt";
 		Assert.assertEquals(expected.replaceFirst("plaintext_(.*).txt", "XXXX"), response.getBody().replaceFirst("plaintext_(.*).txt", "XXXX"));
 //		System.out.println("-------------------\nBBOODDYY GET CONTENT: "+response.getBody()+"\n-------------------");
 	}
@@ -218,7 +218,7 @@ public class EDocumentStorageTest {
 "        <http://dkt.dfki.de/ontologies/nif#DocumentName>\n"+
 "                \"docName1\"^^xsd:string ;\n"+
 "        <http://dkt.dfki.de/ontologies/nif#DocumentPath>\n"+
-"                \"/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage22/ds_plaintext_51143.218932217597879828632919911584.txt\"^^xsd:string ;\n"+
+"                \""+DocumentStorage.storageDirectory+"ds_plaintext_51143.218932217597879828632919911584.txt\"^^xsd:string ;\n"+
 "        nif:beginIndex  \"0\"^^xsd:nonNegativeInteger ;\n"+
 "        nif:endIndex    \"53\"^^xsd:nonNegativeInteger ;\n"+
 "        nif:isString    \"test text to put into the document to the collection\\n\"^^xsd:string .\n";
