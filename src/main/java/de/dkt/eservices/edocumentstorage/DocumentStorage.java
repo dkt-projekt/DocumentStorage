@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.ToXMLContentHandler;
 import org.json.JSONObject;
 import org.springframework.core.io.FileSystemResource;
@@ -33,9 +34,11 @@ import org.xml.sax.SAXException;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
 
 import de.dkt.common.exceptions.LoggedExceptions;
 import de.dkt.common.filemanagement.FileFactory;
+import de.dkt.common.niftools.DKTNIF;
 import de.dkt.common.niftools.NIFReader;
 import de.dkt.common.niftools.NIFWriter;
 import de.dkt.eservices.edocumentstorage.ddbb.Collection;
@@ -60,7 +63,7 @@ public class DocumentStorage {
 
 	private static String collectionsInformationFile = "collectionInformationFile.txt";
 	
-	private static String uriPrefix = "http://dkt.dfki.de/storage/collection";
+	private static String uriPrefix = "http://dkt.dfki.de/storage/collection/";
 
 	static String IV = "AAAAAAAAAAAAAAAA";
 	static String plaintext = "test text 123\0\0\0";
@@ -70,6 +73,17 @@ public class DocumentStorage {
 	private HashMap<String,Collection> collections;
 	
 	public DocumentStorage(){
+		String OS = System.getProperty("os.name");
+		if(OS.startsWith("Mac")){
+			storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage22/";
+		}
+		else if(OS.startsWith("Windows")){
+			storageDirectory = "C:/tests/storage/";
+		}
+		else if(OS.startsWith("Linux")){
+			storageDirectory = "/opt/storage/";
+		}
+		
 		initializeCollectionsInformation();
 	}
 	
@@ -81,7 +95,7 @@ public class DocumentStorage {
 	public boolean initializeCollectionsInformation(){
 		try{
 			collections = new HashMap<String, Collection>();
-			BufferedReader br = FileFactory.generateBufferedReaderInstance(collectionsInformationFile, "utf-8");
+			BufferedReader br = FileFactory.generateBufferedReaderInstance(storageDirectory + collectionsInformationFile, "utf-8");
 			String content = "";
 			String line = br.readLine();
 			while(line!=null){
@@ -110,13 +124,13 @@ public class DocumentStorage {
 			JSONObject colsJSON = new JSONObject();
 			Set<String> keys = collections.keySet();
 			for (String k : keys) {
-				colsJSON.append(k, collections.get(k).getJSONObject());
+				colsJSON.put(k, collections.get(k).getJSONObject());
 			}
 			JSONObject collectionsJSON = new JSONObject();
-			collectionsJSON.append("collections", colsJSON);
+			collectionsJSON.put("collections", colsJSON);
 			
 	
-			BufferedWriter bw = FileFactory.generateBufferedWriterInstance(collectionsInformationFile, "utf-8", false);
+			BufferedWriter bw = FileFactory.generateBufferedWriterInstance(storageDirectory+collectionsInformationFile, "utf-8", false);
 			bw.write(collectionsJSON.toString());
 			bw.close();
 			return true;
@@ -132,41 +146,49 @@ public class DocumentStorage {
         	String prefix = "";
         	
         	String collectionFile = collectionName+".cfe";
-   			File fil = FileFactory.generateFileInstance(storageDirectory+collectionFile);//cfe means collection file extension
-   			if(fil!=null && fil.exists()){
+        	File fil = null;
+        	try{
+        		fil = FileFactory.generateFileInstance(storageDirectory+collectionFile);//cfe means collection file extension
         		throw LoggedExceptions.generateLoggedBadRequestException(logger,"There is a file with the same name, please rename it!!!");
         	}
-   			File fsrDir = FileFactory.generateFileInstance(storageDirectory);
-   			File newFil = new File(fsrDir,collectionFile);
-   			if(!newFil.exists()){
-   				if(!newFil.createNewFile()){
-   	        		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"Error at creating the storageFile!!!");
-   				}
-   			}
+        	catch(Exception e){
+        		fil = FileFactory.generateOrCreateFileInstance(storageDirectory+collectionFile);//cfe means collection file extension
+        	}
+//   			File fsrDir = FileFactory.generateFileInstance(storageDirectory);
+//   			File newFil = new File(fsrDir,collectionFile);
+//   			if(!newFil.exists()){
+//   				if(!newFil.createNewFile()){
+//   	        		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"Error at creating the storageFile!!!");
+//   				}
+//   			}
 
    			String collectionURI = "";
-   			if(prefix==null || prefix.equalsIgnoreCase("")){
-   				//        				documentURI = "http://dkt.dfki.de/document/";
-   				int cnt = collections.size();
-   				collectionURI = uriPrefix+cnt+"/";
-   			}
-   			else{
-   				collectionURI = prefix;
-   			}
+//   			if(prefix==null || prefix.equalsIgnoreCase("")){
+//   				//        				documentURI = "http://dkt.dfki.de/document/";
+//   				int cnt = collections.size();
+//   				collectionURI = uriPrefix+cnt;
+//   			}
+//   			else{
+//   				collectionURI = prefix;
+//   			}
+			collectionURI = uriPrefix+collectionName;
    			Model outModel = NIFManagement.createDefaultCollectionModel(collectionURI);
    			////        			NIFWriter.addInitialString(outModel, nifContent, documentURI);
  //  			StringWriter sw = new StringWriter();
-   			outModel = outModel.write(new FileOutputStream(newFil), "RDF/XML");
+   			outModel = outModel.write(new FileOutputStream(fil), "Turtle");
 //   			outModel = outModel.write(sw, "RDF/XML");
 //   			return sw.toString();
 
    			List<String> users = new LinkedList<String>();
    			users.add(user);
-   			for (String k : sUsers.split(",")) {
-				users.add(k);
-			}
+   			if(sUsers!=null && !sUsers.equalsIgnoreCase("")){
+   	   			String parts[] = sUsers.split(",");
+   	   			for (String k : parts) {
+   					users.add(k);
+   				}
+   			}
    			List<String> documents = new LinkedList<String>();
-   			Collection c = new Collection(collectionName, priv, users, documents, newFil.getAbsolutePath());
+   			Collection c = new Collection(collectionName, priv, users, documents, fil.getAbsolutePath());
    			collections.put(collectionName, c);
    			updateCollectionsInformation();
    			return collectionName;
@@ -255,20 +277,39 @@ public class DocumentStorage {
 				if(!colFil.delete()){
 					throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"There was a problem deleting the collection file.");
 				}
-				return NIFReader.model2String(m, "TTL");
+				
+				collections.remove(collectionName);
+				updateCollectionsInformation();
+				
+				return NIFReader.model2String(m, "Turtle");
 	    	} catch (Exception e) {
 	    		e.printStackTrace();
 	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
 	    	}
 		}
-		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to delete this document.");
+		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to delete this collection.");
 	}
 
-	public String updateCollection(String collectionName, String user) {
+	public String updateCollection(String collectionName, String user, Model collectionModel) {
 		if(checkCollectionPermision(collectionName, user)){
-			//TODO we still have to define what means updating a collection.
+        	String prefix = "";
+        	
+        	String collectionFile = collectionName+".cfe";
+        	File fil = null;
+        	try{
+        		fil = FileFactory.generateFileInstance(storageDirectory+collectionFile);//cfe means collection file extension
+        	}
+        	catch(Exception e){
+        		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"There is a file with the same name, please rename it!!!");
+        	}
+   			try {
+				collectionModel = collectionModel.write(new FileOutputStream(fil), "Turtle");
+			} catch (FileNotFoundException e) {
+        		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger,"Error writting the model to the collection file");
+			}
+   			return collectionName;
 		}
-		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to delete this document.");
+		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to delete this collection.");
 	}
 
 	public boolean checkCollectionPermision(String collectionName, String user) {
@@ -286,47 +327,24 @@ public class DocumentStorage {
 		}
 	}
 
-//	public boolean checkDocumentPermision(String documentName, String user) {
-//       	return parrotDAO.checkDocumentPermission(null,documentName,user);
-//	}
-//	
-//	
-	
-//	public String storeDocument(String documentName, String collection, String user, String type, String content, String path) throws ExternalServiceFailedException {
-//	try {
-//		String documentURI = "";
-//		
-//		//TODO Generate JENA model for file and store current file and content. 
-//		
-//		
-//		
-//		
-//		return documentURI;
-//	} catch (Exception e) {
-//    	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
-//	}
-//}
-//
-
-	public String storeDocument(String collectionName, String user, File inputFile) throws ExternalServiceFailedException {
+	public String storeDocument(String collectionName, String user, String documentName, File inputFile) throws ExternalServiceFailedException {
 		if(checkCollectionPermision(collectionName, user)){
 			try{
 				String storageFileName = inputFile.getName();
-				File fil = FileFactory.generateFileInstance(storageDirectory+storageFileName);
-				if(fil!=null && fil.exists()){
-					throw new ExternalServiceFailedException("There is a file with the same name, please rename it!");
-				}
-				if(!fil.exists()){
-					if(!fil.createNewFile()){
-						throw new ExternalServiceFailedException("Error at creating the storageFile!!!");
-					}
-				}
-
+				String documentPath = storageDirectory+storageFileName;
+	        	File fil = null;
+	        	try{
+	        		fil = FileFactory.generateFileInstance(documentPath);//cfe means collection file extension
+	        		throw LoggedExceptions.generateLoggedBadRequestException(logger,"There is a file with the same name, please rename the document!!!");
+	        	}
+	        	catch(Exception e){
+	        		fil = FileFactory.generateOrCreateFileInstance(documentPath);//cfe means collection file extension
+	        	}
 				FileUtils.copyFile(inputFile, fil);
 
 				AutoDetectParser parser = new AutoDetectParser();
-				//BodyContentHandler handler = new BodyContentHandler();
-				ToXMLContentHandler handler = new ToXMLContentHandler();
+				BodyContentHandler handler = new BodyContentHandler();
+				//ToXMLContentHandler handler = new ToXMLContentHandler();
 				Metadata metadata = new Metadata();
 				InputStream stream = new FileInputStream(inputFile);
 				String body = "";
@@ -338,30 +356,45 @@ public class DocumentStorage {
 				}
 
 				Model collectionModel = getCollection(collectionName);
-	   			String documentURI = NIFManagement.extractCollectionURI(collectionModel)+"/document"+collections.get(collectionName).getDocuments().size();
-				Model documentModel = NIFManagement.createDocumentModel(collectionModel, documentURI, documentURI);
-//				NIFManagement.addDocumentToCollection(collectionModel, documentModel);
+				if(collections.get(collectionName).getDocuments().contains(documentName)){
+					documentName += "_2";
+				}
+	   			String documentPrefix = NIFManagement.extractCollectionURI(collectionModel)+"/document/"+documentName;
+				Model documentModel = NIFManagement.createDocumentModel(collectionModel, documentName, documentPrefix, body, documentPath);
+				String documentURI = NIFManagement.extractCompleteDocumentURI(documentModel);
+				NIFManagement.addDocumentToCollection(collectionModel, documentModel);
 
-	   			collections.get(collectionName).addDocument(documentURI);
+//				System.out.println("COLLECTION: " + NIFReader.model2String(collectionModel, "Turtle"));
+				updateCollection(collectionName, user, collectionModel);
+
+	   			collections.get(collectionName).addDocument(documentName);
 	   			updateCollectionsInformation();
 
-/**	
- * 
- * 	This part is only needed if we want to store also the document into a separate NIF file.
-
-				String nifContent = body;
-
-				File fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");
-				if(fil2!=null && fil2.exists()){
-					throw new ExternalServiceFailedException("There is a file with the same name, please rename it!!!");
-				}
-				if(!fil2.createNewFile()){
-					throw new ExternalServiceFailedException("Error at creating the NIF storageFile!!!");
-				}
-*/
-				StringWriter sw = new StringWriter();
-	   			documentModel = documentModel.write(sw, "RDF/XML");
-				return sw.toString();
+	   			/**	
+	   			 * 
+	   			 * 	This part is only needed if we want to store also the document into a separate NIF file.
+	   			 */
+//	   			File fil2 = null;
+//	        	try{
+//	        		fil2 = FileFactory.generateFileInstance(storageDirectory+storageFileName+".nif");//cfe means collection file extension
+//	        		throw LoggedExceptions.generateLoggedBadRequestException(logger,"There is a file with the same name, please rename the document!!!");
+//	        	}
+//	        	catch(Exception e){
+//	        		fil2 = FileFactory.generateOrCreateFileInstance(storageDirectory+storageFileName+".nif");//cfe means collection file extension
+//	        	}
+//	   			StringWriter sw = new StringWriter();
+//	   			documentModel = documentModel.write(sw, "Turtle");
+//	   			String nifContent = sw.toString();
+//	   			
+//	   			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fil2), "utf-8"));
+//	   			bw.write(nifContent+"\n");
+//	   			bw.close();
+	   			
+	   			/**
+	   			 * This is only needed if we want to return the NIF content of the created document.
+	   			 */
+	   			//return nifContent;
+	   			return documentURI;
 			}
 //			catch(TikaException|SAXException|FileNotFoundException e){
 //				e.printStackTrace();
@@ -468,6 +501,13 @@ public class DocumentStorage {
 			try {
 				Model collectionModel = getCollection(collectionName);
 				Model documentModel = NIFManagement.deleteDocument(documentName, collectionModel);
+				
+				String documentPath = NIFManagement.extractSourceFilePath(documentModel);
+				File f = FileFactory.generateFileInstance(documentPath);
+				if(!f.delete()){
+					logger.error("ERROR at deleting document file from the system storage.");
+				}
+				updateCollection(collectionName, user, collectionModel);
 				return NIFReader.model2String(documentModel, "TTL");
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -477,11 +517,6 @@ public class DocumentStorage {
 		throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, "The user has not permission to read this document.");
 	}
 
-	
-	
-	
-	
-	
 
 	public static byte[] encrypt(String plainText, String encryptionKey) throws Exception {
 		Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding", "SunJCE");

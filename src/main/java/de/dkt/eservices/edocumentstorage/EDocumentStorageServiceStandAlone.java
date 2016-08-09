@@ -220,7 +220,7 @@ public class EDocumentStorageServiceStandAlone extends BaseRestController {
 //	        }
 	        
 			String result = "";
-			String documentId = service.addDocumentToCollection(collectionName, user, inputFile);
+			String documentId = service.addDocumentToCollection(collectionName, user, documentName, inputFile);
 			if(documentId!=null){
 				result = "The document [with Id="+documentId+"] has been successfully created!!";
 			}

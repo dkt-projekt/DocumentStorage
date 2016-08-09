@@ -16,6 +16,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 import de.dkt.common.exceptions.LoggedExceptions;
 import de.dkt.common.niftools.NIFReader;
+import eu.freme.common.conversion.rdf.RDFConstants.RDFSerialization;
 import eu.freme.common.exception.BadRequestException;
 import eu.freme.common.exception.ExternalServiceFailedException;
 
@@ -65,11 +66,17 @@ public class EDocumentStorageService {
 		
 	public String getCollection(String collectionName, String userName){
 		Model m = storageService.getCollection(collectionName); 
-		return NIFReader.model2String(m, "ttl");
+		return NIFReader.model2String(m, "Turtle");
 	}
 		
-	public String updateCollection(String collectionName, String user){
-		return storageService.updateCollection(collectionName,user);
+	public String updateCollection(String collectionName, String user, String collectionContent){
+		try{
+			Model m = NIFReader.extractModelFromFormatString(collectionContent, RDFSerialization.TURTLE);
+			return storageService.updateCollection(collectionName,user,m);
+		}
+		catch(Exception e){
+			throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
+		}
 	}
 
 	public String deleteCollection(String collectionName, String user){
@@ -101,9 +108,9 @@ public class EDocumentStorageService {
 
 	}
 
-	public String addDocumentToCollection(String collectionName, String user, File inputFile) {
+	public String addDocumentToCollection(String collectionName, String user, String documentName, File inputFile) {
 		try{
-			String documentIdentifier = storageService.storeDocument(collectionName, user, inputFile);
+			String documentIdentifier = storageService.storeDocument(collectionName, user, documentName, inputFile);
 			if(documentIdentifier==null){
 				throw LoggedExceptions.generateLoggedBadRequestException(logger,"Error storing the document.");
 			}

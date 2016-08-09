@@ -33,7 +33,7 @@ public class Collection {
 	public Collection(JSONObject collec) {
 		super();
 		this.collectionName = collec.getString("collectionName");
-		this.priv = collec.getBoolean("priv");
+		this.priv = collec.getBoolean("private");
 		this.filePath = collec.getString("filePath");
 
 		users = new LinkedList<String>();
