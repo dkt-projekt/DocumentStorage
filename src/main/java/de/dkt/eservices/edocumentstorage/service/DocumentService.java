@@ -21,7 +21,11 @@ import de.dkt.eservices.edocumentstorage.DocumentStorageConfig;
 import eu.freme.common.persistence.model.Document;
 import eu.freme.common.persistence.model.DocumentCollection;
 import eu.freme.common.persistence.repository.DocumentRepository;
-
+/**
+ * Functionality around documents.
+ * 
+ * @author Jan Nehring - jan.nehring@dfki.de
+ */
 @Component
 public class DocumentService {
 

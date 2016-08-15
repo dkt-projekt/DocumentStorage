@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 import de.dkt.eservices.edocumentstorage.service.DocumentCollectionService;
 import de.dkt.eservices.edocumentstorage.service.DocumentService;
-
+/**
+ * @author Jan Nehring - jan.nehring@dfki.de
+ */
 @Configuration
 @ComponentScan
 public class DocumentStorageConfig {
