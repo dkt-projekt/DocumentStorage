@@ -281,7 +281,7 @@ public class DocumentStorage {
 				collections.remove(collectionName);
 				updateCollectionsInformation();
 				
-				return NIFReader.model2String(m, "Turtle");
+				return NIFReader.model2String(m, RDFSerialization.TURTLE);
 	    	} catch (Exception e) {
 	    		e.printStackTrace();
 	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
@@ -508,7 +508,7 @@ public class DocumentStorage {
 					logger.error("ERROR at deleting document file from the system storage.");
 				}
 				updateCollection(collectionName, user, collectionModel);
-				return NIFReader.model2String(documentModel, "TTL");
+				return NIFReader.model2String(documentModel, RDFSerialization.TURTLE);
 			} catch (Exception e) {
 				e.printStackTrace();
 	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());

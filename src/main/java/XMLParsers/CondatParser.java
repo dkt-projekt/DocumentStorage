@@ -13,6 +13,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.dkt.common.niftools.NIFReader;
 import de.dkt.common.niftools.NIFWriter;
+import eu.freme.common.conversion.rdf.RDFConstants.RDFSerialization;
 
 
 public class CondatParser {
@@ -99,7 +100,7 @@ public class CondatParser {
 		String filePath = "C:\\Users\\pebo01\\Desktop\\Condat_Data\\read_WR_1_3037889.xml";
 		Model nifModel = parseXML2NIFModel(filePath);
 		
-		System.out.println("DEBUG nifModel:\n" + NIFReader.model2String(nifModel, "TTL"));
+		System.out.println("DEBUG nifModel:\n" + NIFReader.model2String(nifModel, RDFSerialization.TURTLE));
 		/*
 		parseXML(filePath);
 		HashMap<String, String> hm = xmlMap.get(filePath);
