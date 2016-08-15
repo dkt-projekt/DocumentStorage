@@ -66,7 +66,7 @@ public class EDocumentStorageService {
 		
 	public String getCollection(String collectionName, String userName){
 		Model m = storageService.getCollection(collectionName); 
-		return NIFReader.model2String(m, "Turtle");
+		return NIFReader.model2String(m, RDFSerialization.TURTLE);
 	}
 		
 	public String updateCollection(String collectionName, String user, String collectionContent){
@@ -123,7 +123,7 @@ public class EDocumentStorageService {
 	
 	public String getNIFDocument(String documentName, String collectionName, String user) {
 		Model doc = storageService.getDocument(documentName, collectionName, user);
-		return NIFReader.model2String(doc, "TTL");
+		return NIFReader.model2String(doc, RDFSerialization.TURTLE);
 	}		
 
     public String getFileContent(String collectionName, String user, String documentName){
