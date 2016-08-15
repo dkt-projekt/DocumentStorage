@@ -58,6 +58,7 @@ public class DocumentStorage {
 //	private static String storageDirectory = "C:\\Users\\jmschnei\\Desktop\\dkt-test\\docStorage\\";
 //	private static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/docstorage/";
 	protected static String storageDirectory = "/Users/jumo04/Documents/DFKI/DKT/dkt-test/testComplete/storage/";
+
 	private static String websiteDirectory = "/var/www/html/data/dkt-documents/collectionName/";
 
 	private static String collectionsInformationFile = "collectionInformationFile.txt";
@@ -280,7 +281,7 @@ public class DocumentStorage {
 				collections.remove(collectionName);
 				updateCollectionsInformation();
 				
-				return NIFReader.model2String(m, "Turtle");
+				return NIFReader.model2String(m, RDFSerialization.TURTLE);
 	    	} catch (Exception e) {
 	    		e.printStackTrace();
 	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
@@ -507,7 +508,7 @@ public class DocumentStorage {
 					logger.error("ERROR at deleting document file from the system storage.");
 				}
 				updateCollection(collectionName, user, collectionModel);
-				return NIFReader.model2String(documentModel, "TTL");
+				return NIFReader.model2String(documentModel, RDFSerialization.TURTLE);
 			} catch (Exception e) {
 				e.printStackTrace();
 	        	throw LoggedExceptions.generateLoggedExternalServiceFailedException(logger, e.getMessage());
