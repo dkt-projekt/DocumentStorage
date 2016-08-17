@@ -3,16 +3,9 @@ package de.dkt.eservices.edocumentstorage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.compress.utils.IOUtils;
@@ -26,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import de.dkt.eservices.edocumentstorage.service.DocumentCollectionService;
 import de.dkt.eservices.edocumentstorage.service.DocumentService;
+import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
 import eu.freme.common.exception.BadRequestException;
 import eu.freme.common.exception.InternalServerErrorException;
 import eu.freme.common.persistence.model.Document;
@@ -56,8 +49,12 @@ public class DocumentStorageRestController extends BaseRestController {
 
 	@Autowired
 	DocumentRepository documentRepository;
+	
+	@Autowired
+	DocumentProcessorService documentProcessorService;
 
 	Logger logger = Logger.getLogger(DocumentStorageRestController.class);
+	
 
 	/**
 	 * Upload either single document to a collection or a zip file.
@@ -113,6 +110,9 @@ public class DocumentStorageRestController extends BaseRestController {
 				throw new InternalServerErrorException("file upload failed");
 			}
 		}
+		
+		// wake up pipeline processor
+		documentProcessorService.wakeupWorkers();
 
 		ResponseEntity<String> response = new ResponseEntity<String>(
 				"File uploaded successful", HttpStatus.OK);

@@ -56,6 +56,23 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
 		</dependency>
+		<dependency>
+			<groupId>eu.freme.bservices.controllers</groupId>
+			<artifactId>pipelines</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>eu.freme.bservices.controllers</groupId>
+			<artifactId>nif-converter</artifactId>
+			<scope>test</scope>
+			<version>0.5-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.freme</groupId>
+			<artifactId>e-capitalization</artifactId>
+			<scope>test</scope>
+			<version>0.1</version>
+		</dependency>
 
 	</dependencies>
 	<repositories>

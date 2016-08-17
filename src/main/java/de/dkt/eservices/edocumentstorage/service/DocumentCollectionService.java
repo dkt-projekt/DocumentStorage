@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import de.dkt.eservices.edocumentstorage.DocumentStorageConfig;
 import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionExistsException;
 import de.dkt.eservices.edocumentstorage.exception.InvalidDocumentCollectionNameException;
-import eu.freme.common.persistence.dao.DocumentCollectionDAO;
 import eu.freme.common.persistence.model.Document;
 import eu.freme.common.persistence.model.DocumentCollection;
 import eu.freme.common.persistence.repository.DocumentCollectionRepository;

@@ -10,6 +10,9 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+/**
+ * @author Jan Nehring - jan.nehring@dfki.de
+ */
 @Entity
 public class DocumentCollection {
 

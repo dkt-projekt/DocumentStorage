@@ -9,7 +9,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import de.dkt.eservices.edocumentstorage.service.DocumentCollectionService;
+import de.dkt.eservices.edocumentstorage.service.DocumentProcessor;
 import de.dkt.eservices.edocumentstorage.service.DocumentService;
+import de.dkt.eservices.edocumentstorage.service.NifConverterService;
+import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
+import eu.freme.common.persistence.dao.DocumentDAO;
 /**
  * @author Jan Nehring - jan.nehring@dfki.de
  */
@@ -55,5 +59,24 @@ public class DocumentStorageConfig {
 		this.documentStorageLocationStr = documentStorageLocationStr;
 	}
 	
+	@Bean
+	public DocumentProcessor documentProcessor(){
+		return new DocumentProcessor();
+	}
 	
+	@Bean
+	public DocumentProcessorService documentProcessorService(){
+		return new DocumentProcessorService();
+	}
+
+	@Bean
+	public NifConverterService nifConverterService(){
+		return new NifConverterService();
+	}
+	
+	@Bean
+	public DocumentDAO documentDAO(){
+		return new DocumentDAO();
+	}
 }
+

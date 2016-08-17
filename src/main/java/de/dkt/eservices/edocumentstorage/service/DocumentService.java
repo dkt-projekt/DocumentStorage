@@ -2,12 +2,10 @@ package de.dkt.eservices.edocumentstorage.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
-import javax.print.Doc;
 import javax.transaction.Transactional;
 
 import org.apache.commons.compress.utils.IOUtils;
@@ -15,12 +13,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.io.Files;
-
 import de.dkt.eservices.edocumentstorage.DocumentStorageConfig;
 import eu.freme.common.persistence.model.Document;
 import eu.freme.common.persistence.model.DocumentCollection;
 import eu.freme.common.persistence.repository.DocumentRepository;
+
 /**
  * Functionality around documents.
  * 
@@ -42,17 +39,19 @@ public class DocumentService {
 
 	/**
 	 * Add a file to a collection. Moves file to storage and inserts file into
-	 * database. Further it sets the documents status to NOT_PROCESSED
+	 * database. Further it sets the documents status to NOT_PROCESSED.
 	 * 
 	 * @param file
 	 * @param documentCollection
 	 */
 	@Transactional
-	public Document addFileToCollection(InputStream inputStream, String fileName,
-			DocumentCollection documentCollection) throws IOException {
+	public Document addFileToCollection(InputStream inputStream,
+			String fileName, DocumentCollection documentCollection)
+			throws IOException {
 
 		Document doc = new Document();
-		doc.setFilename(fileName);
+		doc.setPath(fileName);
+		doc.setFilename(new File(fileName).getName());
 		doc.setCollection(documentCollection);
 		doc.setStatus(Document.Status.NOT_PROCESSED);
 		doc.setUploadTime(new Date());
@@ -69,6 +68,7 @@ public class DocumentService {
 
 	/**
 	 * Get the path to the document on the file system
+	 * 
 	 * @param doc
 	 * @return
 	 */

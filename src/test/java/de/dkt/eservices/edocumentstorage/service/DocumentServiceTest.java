@@ -1,13 +1,8 @@
 package de.dkt.eservices.edocumentstorage.service;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import javax.sql.DataSource;
 import javax.transaction.Transactional;
 
 import org.junit.Test;

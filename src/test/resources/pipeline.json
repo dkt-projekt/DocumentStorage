@@ -1,0 +1,21 @@
+[
+{
+  "method": "POST",
+  "endpoint": "http://localhost:8099/e-capitalization",
+  "headers": {
+    "content-type": "text/turtle",
+    "accept": "text/turtle"
+  },
+  "parameters": {
+  },
+  "body": ""
+},
+{
+  "method": "POST",
+  "endpoint": "http://localhost:8099/test-endpoint",
+  "parameters": {
+  },
+  "headers": {
+  }
+}
+]

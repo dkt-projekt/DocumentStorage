@@ -39,6 +39,9 @@ public class DocumentCollectionServiceTest {
 	@Transactional
 	public void basicTest() throws Exception{
 		
+		documentRepository.deleteAll();
+		documentCollectionRepository.deleteAll();
+		
 		String name = "test";
 		
 		DocumentCollection dc = documentCollectionService.createCollection(name);
@@ -70,7 +73,6 @@ public class DocumentCollectionServiceTest {
 		
 		documentRepository.deleteAll();
 		documentCollectionRepository.deleteAll();
-
 	}
 	
 	@Test
@@ -82,5 +84,6 @@ public class DocumentCollectionServiceTest {
 		assertFalse(documentCollectionService.validateCollectionName("abc*"));
 		assertFalse(documentCollectionService.validateCollectionName("abc/"));
 		assertFalse(documentCollectionService.validateCollectionName("a"));
+		
 	}
 }

@@ -2,19 +2,26 @@ package eu.freme.common.persistence.model;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+
+/**
+ * @author Jan Nehring - jan.nehring@dfki.de
+ */
 @Entity
 public class Document {
 
 	public enum Status{
 		NOT_PROCESSED,
 		PROCESSED,
+		CURRENTLY_PROCESSING,
 		ERROR
 	}
 	
@@ -25,9 +32,13 @@ public class Document {
 	String filename;
 	String path;
 	Status status;
+	
+	@Column(columnDefinition="text")
 	String errorMessage;
+	
 	String documentUri;
 	Date uploadTime;
+	Date lastUpdate;
 	
 	@ManyToOne
 	DocumentCollection collection;
@@ -36,7 +47,7 @@ public class Document {
 	}
 	
 	public Document(Integer id, String filename, String path, Status status,
-			String errorMessage, String documentUri, Date uploadTime) {
+			String errorMessage, String documentUri, Date uploadTime, Date lastUpdate) {
 		super();
 		this.id = id;
 		this.filename = filename;
@@ -45,6 +56,7 @@ public class Document {
 		this.errorMessage = errorMessage;
 		this.documentUri = documentUri;
 		this.uploadTime = uploadTime;
+		this.lastUpdate = lastUpdate;
 	}
 	
 	public String getFilename() {
@@ -99,6 +111,12 @@ public class Document {
 	public void setCollection(DocumentCollection collection) {
 		this.collection = collection;
 	}
-	
-	
+
+	public Date getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(Date lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}	
 }
