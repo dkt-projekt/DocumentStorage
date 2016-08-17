@@ -59,7 +59,7 @@ public class EDocumentStorageRestTest {
 				.asString();
 		assertTrue(response.getStatus() == 200);
 
-		HttpResponse<JsonNode> jsonResponse = Unirest.get(url).asJson();
+		HttpResponse<JsonNode> jsonResponse = Unirest.get(url + "/documents").asJson();
 		assertTrue(jsonResponse.getBody().getArray().length() == 2);
 
 		EDocumentStorageRestTest.clearDb();
@@ -84,7 +84,7 @@ public class EDocumentStorageRestTest {
 				.queryString("fileName", "file.zip").body(data).asString();
 		assertTrue(responseStr.getStatus() == HttpStatus.OK.value());
 
-		HttpResponse<JsonNode> jsonResponse = Unirest.get(url).asJson();
+		HttpResponse<JsonNode> jsonResponse = Unirest.get(url + "/documents").asJson();
 		assertTrue(jsonResponse.getBody().getArray().length() == 7);
 
 		EDocumentStorageRestTest.clearDb();

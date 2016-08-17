@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ import eu.freme.common.persistence.model.DocumentCollection;
 import eu.freme.common.persistence.repository.DocumentCollectionRepository;
 import eu.freme.common.persistence.repository.DocumentRepository;
 import eu.freme.common.rest.BaseRestController;
+
 /**
  * Rest Controller for /document-storage/{collectionName} endpoints
  * 
@@ -49,12 +52,11 @@ public class DocumentStorageRestController extends BaseRestController {
 
 	@Autowired
 	DocumentRepository documentRepository;
-	
+
 	@Autowired
 	DocumentProcessorService documentProcessorService;
 
 	Logger logger = Logger.getLogger(DocumentStorageRestController.class);
-	
 
 	/**
 	 * Upload either single document to a collection or a zip file.
@@ -67,8 +69,7 @@ public class DocumentStorageRestController extends BaseRestController {
 	 */
 	@RequestMapping(value = "/document-storage/{collectionName}", method = RequestMethod.POST)
 	public ResponseEntity<String> uploadFileHandler(
-			@RequestParam("fileName") String name,
-			HttpServletRequest request,
+			@RequestParam("fileName") String name, HttpServletRequest request,
 			@RequestHeader("Content-Type") String contentTypeHeader,
 			@PathVariable String collectionName) {
 
@@ -110,7 +111,7 @@ public class DocumentStorageRestController extends BaseRestController {
 				throw new InternalServerErrorException("file upload failed");
 			}
 		}
-		
+
 		// wake up pipeline processor
 		documentProcessorService.wakeupWorkers();
 
@@ -125,7 +126,7 @@ public class DocumentStorageRestController extends BaseRestController {
 	 * @param collectionName
 	 * @return
 	 */
-	@RequestMapping(value = "/document-storage/{collectionName}", method = RequestMethod.GET)
+	@RequestMapping(value = "/document-storage/{collectionName}/documents", method = RequestMethod.GET)
 	public Collection<Document> getFiles(@PathVariable String collectionName) {
 
 		DocumentCollection dc = documentCollectionRepository
@@ -138,5 +139,53 @@ public class DocumentStorageRestController extends BaseRestController {
 		}
 
 		return documentRepository.findAllByCollection(dc);
+	}
+
+	/**
+	 * Return the processing status
+	 * 
+	 * @param collectionName
+	 * @return
+	 */
+	@RequestMapping(value = "/document-storage/{collectionName}/status", method = RequestMethod.GET)
+	public String getStatus(@PathVariable String collectionName) {
+
+		DocumentCollection dc = documentCollectionRepository
+				.findOne(collectionName);
+
+		if (dc == null) {
+			throw new NotFoundException(
+					"Cannot find document collection with name \""
+							+ collectionName + "\"");
+		}
+
+		HashMap<Document.Status, Integer> counts = new HashMap<Document.Status, Integer>();
+		for (Document doc : dc.getDocuments()) {
+			Integer count = counts.get(doc.getStatus());
+			if (count == null) {
+				count = 1;
+			} else {
+				count++;
+			}
+			counts.put(doc.getStatus(), count);
+		}
+
+		JSONObject json = new JSONObject();
+
+		JSONObject count = new JSONObject();
+		for (Document.Status state : Document.Status.values()) {
+			Integer c = counts.get(state);
+			if (c == null) {
+				c = 0;
+			}
+			count.put(state.name(), c);
+		}
+		json.put("counts", count);
+
+		boolean finished = counts.get(Document.Status.NOT_PROCESSED) == 0
+				&& counts.get(Document.Status.CURRENTLY_PROCESSING) == 0;
+		json.put("finished", finished);
+
+		return json.toString();
 	}
 }

@@ -1,7 +1,7 @@
 [
 {
   "method": "POST",
-  "endpoint": "http://localhost:8099/e-capitalization",
+  "endpoint": "$base-url$/e-capitalization",
   "headers": {
     "content-type": "text/turtle",
     "accept": "text/turtle"
@@ -12,8 +12,9 @@
 },
 {
   "method": "POST",
-  "endpoint": "http://localhost:8099/test-endpoint",
+  "endpoint": "$base-url$/test-endpoint",
   "parameters": {
+  	"storageName": "$collection-name$"
   },
   "headers": {
   }
