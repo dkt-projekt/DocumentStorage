@@ -1,0 +1,22 @@
+[
+{
+  "method": "POST",
+  "endpoint": "$base-url$/e-capitalization",
+  "headers": {
+    "content-type": "text/turtle",
+    "accept": "text/turtle"
+  },
+  "parameters": {
+  },
+  "body": ""
+},
+{
+  "method": "POST",
+  "endpoint": "$base-url$/test-endpoint",
+  "parameters": {
+  	"storageName": "$collection-name$"
+  },
+  "headers": {
+  }
+}
+]
