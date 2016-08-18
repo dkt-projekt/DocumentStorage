@@ -18,8 +18,9 @@
 	<parent>
 		<groupId>eu.freme</groupId>
 		<artifactId>freme-parent</artifactId>
-		<version>0.8</version>
+		<version>0.9-SNAPSHOT</version>
 	</parent>
+	
 	<dependencies>
 		<dependency>
 			<groupId>eu.freme.bservices</groupId>
@@ -65,7 +66,6 @@
 			<groupId>eu.freme.bservices.controllers</groupId>
 			<artifactId>nif-converter</artifactId>
 			<scope>test</scope>
-			<version>0.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.freme</groupId>

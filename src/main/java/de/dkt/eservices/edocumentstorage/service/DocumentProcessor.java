@@ -22,6 +22,13 @@ import eu.freme.common.persistence.model.Document;
 import eu.freme.common.persistence.model.Document.Status;
 import eu.freme.common.persistence.repository.DocumentRepository;
 
+/**
+ * The DocumentProcessor coordinates processing of documents. It implements
+ * Runnable, so usually there are multiple DocumentProcessors running in
+ * parallel.
+ * 
+ * @author Jan Nehring - jan.nehring@dfki.de
+ */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DocumentProcessor implements Runnable {
@@ -45,10 +52,10 @@ public class DocumentProcessor implements Runnable {
 
 	String pipelineApiEndpoint;
 
-	@Value("${server.port ?:8080}")
+	@Value("${server.port:8080}")
 	String port;
 
-	@Value("${dkt.storage.pipeline.base-url:@null")
+	@Value("${dkt.storage.pipeline.base-url:null}")
 	String pipelineBaseUrl;
 
 	@PostConstruct
@@ -56,7 +63,7 @@ public class DocumentProcessor implements Runnable {
 		pipelineApiEndpoint = "http://localhost:" + port.trim()
 				+ "/pipelining/chain";
 
-		if (pipelineBaseUrl == null) {
+		if (pipelineBaseUrl.equals("null")) {
 			pipelineBaseUrl = "http://localhost:" + port;
 		}
 	}
@@ -119,9 +126,10 @@ public class DocumentProcessor implements Runnable {
 			// create http request including parameters
 			HttpRequestWithBody request = Unirest.post(pipelineApiEndpoint)
 					.header("Content-Type", "application/json");
-			
+
 			request.queryString("base-url", pipelineBaseUrl);
-			request.queryString("collection-name", doc.getCollection().getName());
+			request.queryString("collection-name", doc.getCollection()
+					.getName());
 
 			// execute http request
 			HttpResponse<String> response = request.body(pipeline.toString())

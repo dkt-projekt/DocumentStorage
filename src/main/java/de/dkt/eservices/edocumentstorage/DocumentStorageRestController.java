@@ -182,8 +182,8 @@ public class DocumentStorageRestController extends BaseRestController {
 		}
 		json.put("counts", count);
 
-		boolean finished = counts.get(Document.Status.NOT_PROCESSED) == 0
-				&& counts.get(Document.Status.CURRENTLY_PROCESSING) == 0;
+		boolean finished = counts.get(Document.Status.NOT_PROCESSED) == null
+				&& counts.get(Document.Status.CURRENTLY_PROCESSING) == null;
 		json.put("finished", finished);
 
 		return json.toString();
