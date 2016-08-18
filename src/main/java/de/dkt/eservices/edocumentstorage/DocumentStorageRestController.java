@@ -27,6 +27,7 @@ import de.dkt.eservices.edocumentstorage.service.DocumentService;
 import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
 import eu.freme.common.exception.BadRequestException;
 import eu.freme.common.exception.InternalServerErrorException;
+import eu.freme.common.persistence.dao.DocumentDAO;
 import eu.freme.common.persistence.model.Document;
 import eu.freme.common.persistence.model.DocumentCollection;
 import eu.freme.common.persistence.repository.DocumentCollectionRepository;
@@ -55,6 +56,9 @@ public class DocumentStorageRestController extends BaseRestController {
 
 	@Autowired
 	DocumentProcessorService documentProcessorService;
+	
+	@Autowired
+	DocumentDAO documentDao;
 
 	Logger logger = Logger.getLogger(DocumentStorageRestController.class);
 
@@ -158,32 +162,14 @@ public class DocumentStorageRestController extends BaseRestController {
 					"Cannot find document collection with name \""
 							+ collectionName + "\"");
 		}
-
-		HashMap<Document.Status, Integer> counts = new HashMap<Document.Status, Integer>();
-		for (Document doc : dc.getDocuments()) {
-			Integer count = counts.get(doc.getStatus());
-			if (count == null) {
-				count = 1;
-			} else {
-				count++;
-			}
-			counts.put(doc.getStatus(), count);
-		}
-
+		
+		HashMap<Document.Status,Integer> counts = documentDao.getDocumentsStatus(dc);
+		
 		JSONObject json = new JSONObject();
+		json.put("counts", new JSONObject(counts));
 
-		JSONObject count = new JSONObject();
-		for (Document.Status state : Document.Status.values()) {
-			Integer c = counts.get(state);
-			if (c == null) {
-				c = 0;
-			}
-			count.put(state.name(), c);
-		}
-		json.put("counts", count);
-
-		boolean finished = counts.get(Document.Status.NOT_PROCESSED) == null
-				&& counts.get(Document.Status.CURRENTLY_PROCESSING) == null;
+		boolean finished = counts.get(Document.Status.NOT_PROCESSED) == 0
+				&& counts.get(Document.Status.CURRENTLY_PROCESSING) == 0;
 		json.put("finished", finished);
 
 		return json.toString();
