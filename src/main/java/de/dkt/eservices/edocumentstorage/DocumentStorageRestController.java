@@ -104,7 +104,6 @@ public class DocumentStorageRestController extends BaseRestController {
 					tempFile.delete();
 				}
 			}
-
 		} else {
 			// single file upload
 			try {

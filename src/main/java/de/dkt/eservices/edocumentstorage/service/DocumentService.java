@@ -58,6 +58,7 @@ public class DocumentService {
 		doc = documentRepository.save(doc);
 
 		File target = getDocumentLocation(doc);
+		logger.debug("copy file " + fileName + " to " + target.getAbsolutePath());
 
 		FileOutputStream fos = new FileOutputStream(target);
 		IOUtils.copy(inputStream, fos);

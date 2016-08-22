@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,9 @@ import eu.freme.common.persistence.dao.DocumentDAO;
 public class DocumentStorageConfig {
 
 	// configurable directory to store all documents
-	String documentStorageLocationStr = "documents/";
+
+	@Value("${dkt.storage.data-dir:documents/}")
+	String documentStorageLocationStr;
 	
 	// file that points to documentStorageLocationStr
 	File documentStorageLocation;
