@@ -108,7 +108,11 @@ public class DocumentCollectionService {
 			String safeName = java.net.URLEncoder.encode(
 					documentCollection.getName(), "UTF-8");
 			String path = storageDir.getAbsolutePath() + "/" + safeName;
-
+			
+			File dir = new File(path);
+			if( !dir.exists() ){
+				dir.mkdirs();
+			}
 			return new File(path);
 		} catch (java.io.UnsupportedEncodingException e) {
 			throw new RuntimeException("UTF-8 is an unknown encoding!?");
