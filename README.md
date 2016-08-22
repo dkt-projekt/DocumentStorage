@@ -111,3 +111,7 @@ The system will look for a file `pipeline.json` in the classpath. This pipeline 
 **dkt.storage.pipeline.base-url**
 
 This is a standard Java configuration parameter which can be set e.g. in the `application.properties` file. It changes the $base-url$ parameter of the pipelines. The parameter is optional, if it is not configured, $base-url$ will be configured to `http://localhost:xy`, with xy being the port the server listens on, e.g. `http://localhost:8080`.
+
+**dkt.storage.data-dir**
+
+This is a standard Java configuration parameter which can be set e.g. in the `application.properties` file. It specifies the location which is used to store the upload files. The default value is "documents/".
