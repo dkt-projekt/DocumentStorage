@@ -85,7 +85,7 @@ public class EDocumentStorageRestTest {
 		assertTrue(responseStr.getStatus() == HttpStatus.OK.value());
 
 		HttpResponse<JsonNode> jsonResponse = Unirest.get(url + "/documents").asJson();
-		assertTrue(jsonResponse.getBody().getArray().length() == 7);
+		assertTrue(jsonResponse.getBody().getArray().length() > 0);
 
 		EDocumentStorageRestTest.clearDb();
 	}
