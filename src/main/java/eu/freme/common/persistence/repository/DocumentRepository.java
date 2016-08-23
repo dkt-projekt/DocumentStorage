@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 
 import eu.freme.common.persistence.model.Document;
-import eu.freme.common.persistence.model.Document.Status;
 import eu.freme.common.persistence.model.DocumentCollection;
 
 /**

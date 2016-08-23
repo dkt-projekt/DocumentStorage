@@ -3,16 +3,11 @@ package eu.freme.common.persistence.dao;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +49,7 @@ public class DocumentDAO {
 			return null;
 		}
 
-		Document doc = (Document) list.get(0);
+		Document doc = list.get(0);
 
 		doc.setStatus(Status.CURRENTLY_PROCESSING);
 		doc.setLastUpdate(new Date());
@@ -95,7 +90,7 @@ public class DocumentDAO {
 		}
 		for( int i=0; i<list.size(); i++ ){
 			Object[] o = (Object[])list.get(i);
-			Document.Status state = intValues.get((Integer)o[0]);
+			Document.Status state = intValues.get(o[0]);
 			Integer count = ((BigInteger)o[1]).intValue();
 			states.put(state,count);
 		}

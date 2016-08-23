@@ -18,15 +18,15 @@ public class DocumentCollection {
 
 	@Id
 	String name;
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "collection")
 	List<Document> documents;
-	
+
 	Date creationTime;
 
-	public DocumentCollection(){	
+	public DocumentCollection() {
 	}
-	
+
 	public DocumentCollection(String name, List<Document> documents,
 			Date creationTime) {
 		super();
@@ -58,6 +58,5 @@ public class DocumentCollection {
 	public void setCreationTime(Date creationTime) {
 		this.creationTime = creationTime;
 	}
-	
-	
+
 }
