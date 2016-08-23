@@ -151,16 +151,17 @@ public class DocumentCollectionService {
 			zipFile.close();
 			zipFile = null;
 		} catch (Exception e) {
+			for (Document doc : writtenFiles) {
+				File file = documentService.getDocumentLocation(doc);
+				file.delete();
+			}
+			
 			throw e;
 		} finally {
 			if (zipFile != null) {
 				zipFile.close();
 			}
 
-			for (Document doc : writtenFiles) {
-				File file = documentService.getDocumentLocation(doc);
-				file.delete();
-			}
 		}
 	}
 }
