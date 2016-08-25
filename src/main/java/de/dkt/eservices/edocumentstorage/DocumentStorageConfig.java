@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import de.dkt.eservices.edocumentstorage.service.DocumentCollectionService;
-import de.dkt.eservices.edocumentstorage.service.DocumentProcessor;
+import de.dkt.eservices.edocumentstorage.service.SingleDocumentProcessor;
 import de.dkt.eservices.edocumentstorage.service.DocumentService;
 import de.dkt.eservices.edocumentstorage.service.NifConverterService;
 import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
@@ -63,8 +63,8 @@ public class DocumentStorageConfig {
 	}
 	
 	@Bean
-	public DocumentProcessor documentProcessor(){
-		return new DocumentProcessor();
+	public SingleDocumentProcessor singleDocumentProcessor(){
+		return new SingleDocumentProcessor();
 	}
 	
 	@Bean

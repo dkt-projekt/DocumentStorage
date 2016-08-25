@@ -71,7 +71,6 @@
 			<groupId>eu.freme</groupId>
 			<artifactId>e-capitalization</artifactId>
 			<scope>test</scope>
-			<version>0.1</version>
 		</dependency>
 
 	</dependencies>

@@ -11,6 +11,7 @@
 	<import resource="classpath:spring-configurations/test-helper.xml" />
 	<import resource="classpath:spring-configurations/edocumentstorage.xml" />
 	<import resource="classpath:spring-configurations/pipelines.xml" />
+	<import resource="classpath:spring-configurations/nif-converter.xml" />
 	<import resource="classpath:spring-configurations/e-capitalization.xml" />
 	
 </beans>

@@ -31,7 +31,7 @@ import eu.freme.common.persistence.repository.DocumentRepository;
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class DocumentProcessor implements Runnable {
+public class SingleDocumentProcessor implements Runnable {
 
 	@Autowired
 	DocumentDAO dao;
@@ -45,7 +45,7 @@ public class DocumentProcessor implements Runnable {
 	@Autowired
 	DocumentRepository documentRepository;
 
-	Logger logger = Logger.getLogger(DocumentProcessor.class);
+	Logger logger = Logger.getLogger(SingleDocumentProcessor.class);
 
 	int id;
 	static int idCounter = 0;
@@ -70,7 +70,7 @@ public class DocumentProcessor implements Runnable {
 
 	boolean running = true;
 
-	public DocumentProcessor() {
+	public SingleDocumentProcessor() {
 		this.id = idCounter++;
 	}
 
@@ -94,6 +94,8 @@ public class DocumentProcessor implements Runnable {
 		String turtle = null;
 		try {
 			turtle = nifConverterService.convertToTurtle(doc);
+			logger.debug("Processor #" + id + " converted \""
+					+ doc.getFilename() + "\" to turtle:\n" + turtle);
 		} catch (Exception e) {
 			logger.error("Cannot convert file", e);
 			dao.setErrorState(doc, e.getMessage());
@@ -106,6 +108,8 @@ public class DocumentProcessor implements Runnable {
 		String resourceUri = null;
 		try {
 			resourceUri = nifConverterService.getResourceUri(turtle);
+			logger.debug("Processor #" + id + " extracted resource uri \""
+					+ resourceUri + "\" from \"" + doc.getFilename());
 			doc.setDocumentUri(resourceUri);
 			documentRepository.save(doc);
 		} catch (Exception e1) {
@@ -142,6 +146,7 @@ public class DocumentProcessor implements Runnable {
 						+ response.getBody());
 				return false;
 			}
+			logger.debug("after processing: " + response.getBody().toString());
 			logger.debug("document processor #" + id
 					+ " finished processing file \"" + doc.getFilename() + "\"");
 			return true;
@@ -169,6 +174,7 @@ public class DocumentProcessor implements Runnable {
 
 			// convert to turtle
 			String turtle = convertToTurtle(doc);
+			logger.debug("before\n" + turtle);
 			if (turtle == null) {
 				continue;
 			}

@@ -61,7 +61,7 @@ public class DocumentProcessorService implements ApplicationContextAware {
 		// construct worker threads
 		workerThreads = new Thread[numThreads];
 		for (int i = 0; i < numThreads; i++) {
-			DocumentProcessor dp = appContext.getBean(DocumentProcessor.class);
+			SingleDocumentProcessor dp = appContext.getBean(SingleDocumentProcessor.class);
 			Thread t = new Thread(dp);
 			workerThreads[i] = t;
 			t.start();

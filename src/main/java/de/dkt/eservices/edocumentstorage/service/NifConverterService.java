@@ -4,17 +4,21 @@ import java.net.URLEncoder;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
 
 import eu.freme.common.conversion.rdf.RDFConstants;
 import eu.freme.common.conversion.rdf.RDFConversionService;
+import eu.freme.common.persistence.dao.DocumentDAO;
 import eu.freme.common.persistence.model.Document;
 
 /**
@@ -26,21 +30,28 @@ import eu.freme.common.persistence.model.Document;
 @Component
 public class NifConverterService {
 
-	// @Value("#{document-storage.nif-converter-url ?: @null}")
-	String nifConverterUrl = "http://api-dev.freme-project.eu/current/toolbox/nif-converter";
+	String nifConverterUrl;
 
 	String prefix = "http://digitale-kuratierung.de/ns/";
 
-	// @Value("#{server.port ?: 8080}")
-	// String port;
+	@Value("${server.port:8080}")
+	String port;
+	
+	@Autowired
+	DocumentDAO documentDao;
 
 	@PostConstruct
 	public void init() {
-
+		nifConverterUrl = "http://localhost:" + port + "/toolbox/nif-converter";
 	}
 
 	@Autowired
 	RDFConversionService rdfConverter;
+	
+	@Autowired
+	DocumentService documentService;
+	
+	Logger logger = Logger.getLogger(NifConverterService.class);
 
 	/**
 	 * Convert a document to a turtle file using the nif-converter API
@@ -50,12 +61,22 @@ public class NifConverterService {
 	 * @throws Exception
 	 */
 	public String convertToTurtle(Document doc) throws Exception {
-		Model model = ModelFactory.createDefaultModel();
-		String thisPrefix = prefix
-				+ URLEncoder.encode(doc.getPath(), "utf-8");
-		rdfConverter.plaintextToRDF(model, "hello world", null, thisPrefix);
-		return rdfConverter.serializeRDF(model,
-				RDFConstants.RDFSerialization.TURTLE);
+		String thisPrefix = prefix + URLEncoder.encode(doc.getPath(), "utf-8");
+		HttpResponse<String> response = Unirest
+				.post(nifConverterUrl)
+				.queryString("informat", "TIKAFile")
+				.queryString("prefix", thisPrefix)
+				.header("Accept", "text/turtle")
+				.field("inputFile", documentService.getDocumentLocation(doc))
+				.asString();
+
+		if( response.getStatus() == 200 ){
+			String ttl = response.getBody().toString();
+			return ttl;
+		} else{
+			documentDao.setErrorState(doc, response.toString());
+			throw new RuntimeException(response.toString());
+		}
 	}
 
 	/**
