@@ -42,6 +42,7 @@ public class DocumentStorageConfig {
 		if( !documentStorageLocation.exists() && !documentStorageLocation.mkdirs()){
 			throw new RuntimeException(String.format("Cannot create storage directory \"%s\"", documentStorageLocation)); 
 		}		
+		
 	}
 	
 	public File getDocumentStorageLocation(){

@@ -2,15 +2,19 @@ package de.dkt.eservices.edocumentstorage.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+
+import eu.freme.common.persistence.dao.DocumentDAO;
 
 /**
  * Service that coordinates the processing of the pipeline.
@@ -44,13 +48,16 @@ public class DocumentProcessorService implements ApplicationContextAware {
 
 	ApplicationContext appContext;
 
+	@Autowired
+	DocumentDAO documentDao;
+
 	@PostConstruct
 	public void init() throws IOException {
 
 		// read pipeline definition file
 		try {
 			InputStream in = this.getClass().getClassLoader()
-                    .getResourceAsStream(pipelineFile);
+					.getResourceAsStream(pipelineFile);
 			pipeline = new String(IOUtils.toByteArray(in));
 		} catch (IOException e) {
 			logger.error("failed to read pipeline definition file \""
@@ -61,11 +68,17 @@ public class DocumentProcessorService implements ApplicationContextAware {
 		// construct worker threads
 		workerThreads = new Thread[numThreads];
 		for (int i = 0; i < numThreads; i++) {
-			SingleDocumentProcessor dp = appContext.getBean(SingleDocumentProcessor.class);
+			SingleDocumentProcessor dp = appContext
+					.getBean(SingleDocumentProcessor.class);
 			Thread t = new Thread(dp);
 			workerThreads[i] = t;
 			t.start();
 		}
+
+		// reset all files from "currently processing" to "not processed" so
+		// documents that were processed when the broker was previously shutdown
+		// will still be processed
+		documentDao.resetCurrentlyProcessing();
 	}
 
 	@Override
@@ -84,8 +97,8 @@ public class DocumentProcessorService implements ApplicationContextAware {
 	 * 
 	 */
 	public void wakeupWorkers() {
-		synchronized(this){
-			this.notifyAll();			
+		synchronized (this) {
+			this.notifyAll();
 		}
 	}
 }

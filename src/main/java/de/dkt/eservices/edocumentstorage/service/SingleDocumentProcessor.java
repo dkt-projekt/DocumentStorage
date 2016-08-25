@@ -146,9 +146,8 @@ public class SingleDocumentProcessor implements Runnable {
 						+ response.getBody());
 				return false;
 			}
-			logger.debug("after processing: " + response.getBody().toString());
 			logger.debug("document processor #" + id
-					+ " finished processing file \"" + doc.getFilename() + "\"");
+					+ " finished processing file \"" + doc.getFilename() + "\", the pipeline returns:\n" + response.getBody().toString());
 			return true;
 		} catch (UnirestException e) {
 			logger.error("error executing the pipeline", e);

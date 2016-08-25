@@ -96,4 +96,13 @@ public class DocumentDAO {
 		}
 		return states;
 	}
+	
+	/**
+	 * This method changes the state of all documents with state CURRENTLY_PROCESSING to UNPROCESSED
+	 */
+	public void resetCurrentlyProcessing(){
+		String queryStr = "UPDATE document SET status=" + Status.NOT_PROCESSED.ordinal() + " WHERE status=" + Status.CURRENTLY_PROCESSING.ordinal();
+		Query q = entityManager.createNativeQuery(queryStr);
+		q.executeUpdate();
+	}
 }
