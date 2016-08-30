@@ -76,7 +76,7 @@ public class DocumentDAO {
 	 * @return
 	 */
 	public HashMap<Document.Status,Integer> getDocumentsStatus(DocumentCollection dc){
-		String queryStr = "SELECT status, count(id) FROM dkt.document  WHERE collection_name=? GROUP BY status ;";
+		String queryStr = "SELECT status, count(id) FROM document  WHERE collection_name=? GROUP BY status ;";
 		Query q = entityManager.createNativeQuery(queryStr);
 		q.setParameter(1, dc.getName());
 		@SuppressWarnings("rawtypes")
