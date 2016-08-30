@@ -28,7 +28,7 @@ import eu.freme.common.starter.FREMEStarter;
 public class EDocumentStorageRestTest {
 
 	static ConfigurableApplicationContext appContext = null;
-	String url = "http://localhost:8099/document-storage/my-collection";
+	String url = "http://localhost:8098/document-storage/my-collection";
 
 	@BeforeClass
 	public static void setup() {

@@ -33,7 +33,7 @@ public class FullProcessTest {
 		ConfigurableApplicationContext appContext = FREMEStarter
 				.startPackageFromClasspath("storage-test-package.xml");
 
-		String baseUrl = "http://localhost:8099";
+		String baseUrl = "http://localhost:8098";
 
 		String storageUrl = baseUrl + "/document-storage/my-collection";
 		String tripleStoreUrl = baseUrl + "/test-endpoint";
