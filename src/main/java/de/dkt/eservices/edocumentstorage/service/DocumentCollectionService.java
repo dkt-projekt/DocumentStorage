@@ -15,10 +15,12 @@ import java.util.zip.ZipFile;
 import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import de.dkt.eservices.edocumentstorage.DocumentStorageConfig;
+import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionDoesNotExistException;
 import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionExistsException;
 import de.dkt.eservices.edocumentstorage.exception.InvalidDocumentCollectionNameException;
 import eu.freme.common.persistence.model.Document;
@@ -42,13 +44,16 @@ public class DocumentCollectionService {
 	@Autowired
 	DocumentService documentService;
 
+	@Autowired
+	TriplestoreService tripleStoreCrudService;
+
 	/**
 	 * This variable describes the uri of the the graph in which the collection
 	 * data is stored in the triple store. The collection name will be appended
 	 * to the graph uri.
 	 */
-	String graphName = "http://digitale-kuratierung.de/ns/graphs/";
-	
+	String graphBaseUri = "http://digitale-kuratierung.de/ns/graphs/";
+
 	Logger logger = Logger.getLogger(DocumentCollection.class);
 
 	/**
@@ -97,13 +102,19 @@ public class DocumentCollectionService {
 	 * in a later version.
 	 * 
 	 * @param name
+	 * @throws IOException
 	 */
 	@Transactional
-	public void deleteCollection(String name) {
-		documentCollectionRepository.deleteByName(name);
+	public void deleteCollection(DocumentCollection dc) throws IOException {
 
-		// TODO delete files
-		// TODO delete from triple store?
+		String graphUri = getGraphUri(dc);
+		
+		tripleStoreCrudService.deleteGraph(graphUri);
+		
+		File dir = getCollectionStorageDirectory(dc);
+		FileUtils.deleteDirectory(dir);
+		
+		documentCollectionRepository.delete(dc);
 	}
 
 	/**
@@ -177,9 +188,9 @@ public class DocumentCollectionService {
 		}
 	}
 
-	public String getGraphName(DocumentCollection dc) {
+	public String getGraphUri(DocumentCollection dc) {
 		try {
-			return graphName + URLEncoder.encode(dc.getName(), "utf-8");
+			return graphBaseUri + URLEncoder.encode(dc.getName(), "utf-8");
 		} catch (UnsupportedEncodingException e) {
 			logger.error(e);
 			return null;

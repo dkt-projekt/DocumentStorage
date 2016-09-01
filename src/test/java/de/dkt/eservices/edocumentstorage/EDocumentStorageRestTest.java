@@ -36,7 +36,7 @@ public class EDocumentStorageRestTest {
 				.startPackageFromClasspath("spring-configurations/edocumentstorage.xml");
 		
 		String port = appContext.getEnvironment().getProperty("server.port");
-		url = "http://localhost:" + port + "/document-storage/my-collection";
+		url = "http://localhost:" + port + "/document-storage/collections/my-collection";
 
 		EDocumentStorageRestTest.clearDb();
 	}

@@ -3,14 +3,17 @@ package de.dkt.eservices.edocumentstorage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionDoesNotExistException;
 import de.dkt.eservices.edocumentstorage.service.DocumentCollectionService;
 import de.dkt.eservices.edocumentstorage.service.DocumentService;
 import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
@@ -71,7 +75,7 @@ public class DocumentStorageRestController extends BaseRestController {
 	 * @param collectionName
 	 * @return
 	 */
-	@RequestMapping(value = "/document-storage/{collectionName}", method = RequestMethod.POST)
+	@RequestMapping(value = "/document-storage/collections/{collectionName}", method = RequestMethod.POST)
 	public ResponseEntity<String> uploadFileHandler(
 			@RequestParam("fileName") String name, HttpServletRequest request,
 			@RequestHeader("Content-Type") String contentTypeHeader,
@@ -129,7 +133,7 @@ public class DocumentStorageRestController extends BaseRestController {
 	 * @param collectionName
 	 * @return
 	 */
-	@RequestMapping(value = "/document-storage/{collectionName}/documents", method = RequestMethod.GET)
+	@RequestMapping(value = "/document-storage/collections/{collectionName}/documents", method = RequestMethod.GET)
 	public Collection<Document> getFiles(@PathVariable String collectionName) {
 
 		DocumentCollection dc = documentCollectionRepository
@@ -150,7 +154,7 @@ public class DocumentStorageRestController extends BaseRestController {
 	 * @param collectionName
 	 * @return
 	 */
-	@RequestMapping(value = "/document-storage/{collectionName}/status", method = RequestMethod.GET)
+	@RequestMapping(value = "/document-storage/collections/{collectionName}/status", method = RequestMethod.GET)
 	public String getStatus(@PathVariable String collectionName) {
 
 		DocumentCollection dc = documentCollectionRepository
@@ -172,5 +176,42 @@ public class DocumentStorageRestController extends BaseRestController {
 		json.put("finished", finished);
 
 		return json.toString();
+	}
+	
+	/**
+	 * Return all collections (only names).
+	 * 
+	 * @param collectionName
+	 */
+	@RequestMapping(value = "/document-storage/collections/{collectionName}", method = RequestMethod.DELETE)
+	public void deleteCollection(@PathVariable String collectionName) {
+		
+		DocumentCollection dc = documentCollectionRepository
+				.findOne(collectionName);
+		
+		if( dc == null ){
+			throw new DocumentCollectionDoesNotExistException();
+		}
+		
+		try {
+			documentCollectionService.deleteCollection(dc);
+		} catch (IOException e) {
+			logger.error(e);
+			throw new InternalServerErrorException("failed to delete document collection");
+		}
+	}
+	
+
+	@RequestMapping(value = "/document-storage/collections", method = RequestMethod.GET)
+	public String getCollections() {
+		
+		Iterator<DocumentCollection> itr = documentCollectionRepository.findAll().iterator();
+		ArrayList<String> list = new ArrayList<String>();
+		while( itr.hasNext() ){
+			list.add(itr.next().getName());
+		}
+		JSONArray json = new JSONArray(list);
+		return json.toString();
+		
 	}
 }

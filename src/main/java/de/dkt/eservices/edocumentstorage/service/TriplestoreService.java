@@ -9,6 +9,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Component;
  * @author Jan Nehring - jan.nehring@dfki.de
  */
 @Component
-public class SparqlCrudService {
+public class TriplestoreService {
 
 	/**
 	 * Username to authenticate with crudApiEndpoint
@@ -90,6 +91,31 @@ public class SparqlCrudService {
 			}
 		}
 
+		return ok;
+	}
+
+	/**
+	 * Delete a whole graph from the triple store.
+	 * 
+	 * @param graphUri
+	 * @return
+	 * @throws IOException
+	 */
+	public boolean deleteGraph(String graphUri) throws IOException {
+		CloseableHttpClient httpclient = null;
+		CloseableHttpResponse response = null;
+		boolean ok = false;
+		try {
+			httpclient = getHttpClient();
+			String uri = crudApiEndpoint + "?graph-uri="
+					+ URLEncoder.encode(graphUri, "utf-8");
+			HttpDelete request = new HttpDelete(uri);
+			response = httpclient.execute(request);
+			StatusLine sl = response.getStatusLine();
+			ok = sl.getStatusCode() == 200 || sl.getStatusCode() == 201;
+		} finally {
+			httpclient.close();
+		}
 		return ok;
 	}
 }

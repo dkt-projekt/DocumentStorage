@@ -6,7 +6,7 @@ The DocumentStorage module performs the upload of documents to the DKT platform.
 
 ### Add documents to the Document Storage
 
-API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/{collection-name}
+API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
 HTTP method: POST
 Parameters:
 * URL parameter collection-name: The name of the collection
@@ -16,18 +16,18 @@ CURL examples:
 #### Add an HTML file to the collection
 
 ```
-curl -X POST -d '<p>Welcome to Berlin!</p>' "http://dev.digitale-kuratierung.de/api/document-storage/my-collection?fileName=my-file.html"
+curl -X POST -d '<p>Welcome to Berlin!</p>' "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection?fileName=my-file.html"
 ```
 
 #### Add a Zip file
 
 ```
-curl -X POST -H "Content-Type: application/zip" "http://dev.digitale-kuratierung.de/api/document-storage/my-collection?fileName=file2.zip"
+curl -X POST -H "Content-Type: application/zip" "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection?fileName=file2.zip"
 ```
 
 ### Retrieve all documents from a collection
 
-API endpoint: http://dev.digitale-kuratierung.de/api/{collection-name}/my-collection/documents
+API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/documents
 Request method: GET
 Parameters: 
 * URL parameter collection-name: The name of the collection
@@ -76,13 +76,13 @@ Example Output:
 ### Retrieve aggregated status information from a collection
 
 
-API endpoint: http://dev.digitale-kuratierung.de/api/{collection-name}/my-collection/status
+API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/status
 Request method: GET
 Parameters: 
 * URL parameter collection-name: The name of the collection
 
 ```
-curl -X GET -H "http://dev.digitale-kuratierung.de/api/document-storage/my-collection/status"
+curl -X GET -H "http://dev.digitale-kuratierung.de/api/document-storage/collections//my-collection/status"
 ```
 
 Example Output:
@@ -98,6 +98,32 @@ Example Output:
   "finished": true
 }
 ```
+
+### Delete a collection
+
+Delete a collection. This will delete the collection from the database, delete all its file from the server and also delete the data from the triple store.
+
+API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
+Request method: DELETE
+Parameters:
+* URL parameter collection-name: The name of the collection
+
+### Get all collections
+
+API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections
+Request method: GET
+Parameters: none
+
+```
+curl -X GET -H "http://dev.digitale-kuratierung.de/api/document-storage/my-collection"
+```
+
+Example Output:
+
+```
+["mendelsohn-archive", "example-collection"]
+```
+
 
 ## Configuration
 

@@ -10,6 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * @author Jan Nehring - jan.nehring@dfki.de
  */
@@ -20,6 +22,7 @@ public class DocumentCollection {
 	String name;
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "collection")
+	@JsonIgnore
 	List<Document> documents;
 
 	Date creationTime;

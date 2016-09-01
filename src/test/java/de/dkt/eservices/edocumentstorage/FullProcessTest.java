@@ -36,7 +36,7 @@ public class FullProcessTest {
 		String port = appContext.getEnvironment().getProperty("server.port");
 		String baseUrl = "http://localhost:" + port;
 
-		String storageUrl = baseUrl + "/document-storage/my-collection";
+		String storageUrl = baseUrl + "/document-storage/collections/my-collection";
 		String tripleStoreUrl = baseUrl + "/test-endpoint";
 
 		// add a file

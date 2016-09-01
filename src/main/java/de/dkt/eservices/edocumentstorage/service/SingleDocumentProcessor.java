@@ -47,7 +47,7 @@ public class SingleDocumentProcessor implements Runnable {
 	DocumentRepository documentRepository;
 
 	@Autowired
-	SparqlCrudService sparqlCrudService;
+	TriplestoreService sparqlCrudService;
 
 	@Autowired
 	DocumentCollectionService documentCollectionService;
@@ -166,7 +166,7 @@ public class SingleDocumentProcessor implements Runnable {
 	}
 
 	private boolean writeToTripleStore(Document doc, String enrichedTurtle) {
-		String graphUri = documentCollectionService.getGraphName(doc
+		String graphUri = documentCollectionService.getGraphUri(doc
 				.getCollection());
 		try {
 			return sparqlCrudService.addDataToStore(graphUri, enrichedTurtle);

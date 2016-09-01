@@ -68,9 +68,6 @@ public class DocumentCollectionServiceTest {
 		dc = documentCollectionRepository.findOneByName(name);
 		assertTrue(dc.getDocuments().size()==2);
 		
-		documentCollectionService.deleteCollection(name);
-		assertTrue(documentCollectionRepository.count() == 0);
-		
 		documentRepository.deleteAll();
 		documentCollectionRepository.deleteAll();
 	}
