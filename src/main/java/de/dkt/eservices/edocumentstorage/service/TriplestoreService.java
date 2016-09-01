@@ -74,9 +74,9 @@ public class TriplestoreService {
 					+ URLEncoder.encode(graphUri, "utf-8");
 			HttpPost request = new HttpPost(uri);
 
-			request.addHeader("Content-Type", "text/turtle");
+			request.addHeader("Content-Type", "text/turtle; charset=utf-8");
 
-			HttpEntity entity = new StringEntity(turtle);
+			HttpEntity entity = new StringEntity(turtle, "utf-8");
 			request.setEntity(entity);
 
 			response = httpclient.execute(request);
@@ -118,4 +118,29 @@ public class TriplestoreService {
 		}
 		return ok;
 	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getCrudApiEndpoint() {
+		return crudApiEndpoint;
+	}
+
+	public void setCrudApiEndpoint(String crudApiEndpoint) {
+		this.crudApiEndpoint = crudApiEndpoint;
+	}
+
 }
