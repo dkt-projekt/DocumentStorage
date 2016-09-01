@@ -1,5 +1,6 @@
 package de.dkt.eservices.edocumentstorage.service;
 
+import java.io.IOException;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
@@ -44,6 +45,12 @@ public class SingleDocumentProcessor implements Runnable {
 
 	@Autowired
 	DocumentRepository documentRepository;
+
+	@Autowired
+	SparqlCrudService sparqlCrudService;
+
+	@Autowired
+	DocumentCollectionService documentCollectionService;
 
 	Logger logger = Logger.getLogger(SingleDocumentProcessor.class);
 
@@ -120,7 +127,7 @@ public class SingleDocumentProcessor implements Runnable {
 		return resourceUri != null;
 	}
 
-	public boolean executePipeline(Document doc, String turtle) {
+	private String executePipeline(Document doc, String turtle) {
 		try {
 
 			// construct pipeline
@@ -144,13 +151,27 @@ public class SingleDocumentProcessor implements Runnable {
 				logger.error("document processor sets state of \""
 						+ doc.getFilename() + "\" to error:\n"
 						+ response.getBody());
-				return false;
+				return null;
 			}
-			logger.debug("document processor #" + id
-					+ " finished processing file \"" + doc.getFilename() + "\", the pipeline returns:\n" + response.getBody().toString());
-			return true;
+
+			logger.debug("document processor #" + id + " returned doc \""
+					+ doc.getFilename() + "\" from pipeline, response:\n"
+					+ response.getBody());
+			return response.getBody();
 		} catch (UnirestException e) {
 			logger.error("error executing the pipeline", e);
+			dao.setErrorState(doc, e.getMessage());
+			return null;
+		}
+	}
+
+	private boolean writeToTripleStore(Document doc, String enrichedTurtle) {
+		String graphUri = documentCollectionService.getGraphName(doc
+				.getCollection());
+		try {
+			return sparqlCrudService.addDataToStore(graphUri, enrichedTurtle);
+		} catch (IOException e) {
+			logger.error(e);
 			dao.setErrorState(doc, e.getMessage());
 			return false;
 		}
@@ -160,35 +181,54 @@ public class SingleDocumentProcessor implements Runnable {
 	public void run() {
 
 		while (running) {
-			logger.debug("start document processor #" + id);
+			Document doc = null;
+			try {
+				logger.debug("start document processor #" + id);
 
-			// fetch document
-			Document doc = fetchNextDocument();
-			if (doc == null) {
-				continue;
-			}
+				// fetch document
+				doc = fetchNextDocument();
+				if (doc == null) {
+					continue;
+				}
 
-			logger.debug("document processor #" + id
-					+ " starts processing file \"" + doc.getFilename() + "\"");
+				logger.debug("document processor #" + id
+						+ " starts processing file \"" + doc.getFilename()
+						+ "\"");
 
-			// convert to turtle
-			String turtle = convertToTurtle(doc);
-			logger.debug("before\n" + turtle);
-			if (turtle == null) {
-				continue;
-			}
+				// convert to turtle
+				String turtle = convertToTurtle(doc);
+				logger.debug("before\n" + turtle);
+				if (turtle == null) {
+					continue;
+				}
 
-			// extract resource name and store as file
-			if (!addUriToDoc(doc, turtle)) {
-				continue;
-			}
+				// extract resource name and store as file
+				if (!addUriToDoc(doc, turtle)) {
+					continue;
+				}
 
-			// execute pipeline
-			if (executePipeline(doc, turtle)) {
-				doc.setLastUpdate(new Date());
-				doc.setStatus(Status.PROCESSED);
-				documentRepository.save(doc);
+				// execute pipeline
+				String enrichedTurtle = null;
+				if ((enrichedTurtle = executePipeline(doc, turtle)) == null) {
+					continue;
+				}
+
+				// write result to triple store
+				if (writeToTripleStore(doc, enrichedTurtle)) {
+					logger.debug("document processor #" + id
+							+ " finished processing file \""
+							+ doc.getFilename() + "\"");
+					doc.setLastUpdate(new Date());
+					doc.setStatus(Status.PROCESSED);
+					documentRepository.save(doc);
+				}
+			} catch (Exception e) {
+				logger.error(e);
+				if (doc != null) {
+					dao.setErrorState(doc, e.getMessage());
+				}
 			}
 		}
+
 	}
 }

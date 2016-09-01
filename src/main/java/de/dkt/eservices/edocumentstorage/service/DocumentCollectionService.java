@@ -3,6 +3,8 @@ package de.dkt.eservices.edocumentstorage.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -12,6 +14,7 @@ import java.util.zip.ZipFile;
 
 import javax.transaction.Transactional;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +41,15 @@ public class DocumentCollectionService {
 
 	@Autowired
 	DocumentService documentService;
+
+	/**
+	 * This variable describes the uri of the the graph in which the collection
+	 * data is stored in the triple store. The collection name will be appended
+	 * to the graph uri.
+	 */
+	String graphName = "http://digitale-kuratierung.de/ns/graphs/";
+	
+	Logger logger = Logger.getLogger(DocumentCollection.class);
 
 	/**
 	 * Create collection in database, create storage location
@@ -108,9 +120,9 @@ public class DocumentCollectionService {
 			String safeName = java.net.URLEncoder.encode(
 					documentCollection.getName(), "UTF-8");
 			String path = storageDir.getAbsolutePath() + "/" + safeName;
-			
+
 			File dir = new File(path);
-			if( !dir.exists() ){
+			if (!dir.exists()) {
 				dir.mkdirs();
 			}
 			return new File(path);
@@ -155,13 +167,22 @@ public class DocumentCollectionService {
 				File file = documentService.getDocumentLocation(doc);
 				file.delete();
 			}
-			
+
 			throw e;
 		} finally {
 			if (zipFile != null) {
 				zipFile.close();
 			}
 
+		}
+	}
+
+	public String getGraphName(DocumentCollection dc) {
+		try {
+			return graphName + URLEncoder.encode(dc.getName(), "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			logger.error(e);
+			return null;
 		}
 	}
 }

@@ -20,7 +20,7 @@
 		<artifactId>freme-parent</artifactId>
 		<version>0.9</version>
 	</parent>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>eu.freme.bservices</groupId>
@@ -72,7 +72,6 @@
 			<artifactId>e-capitalization</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 	<repositories>
 		<repository>

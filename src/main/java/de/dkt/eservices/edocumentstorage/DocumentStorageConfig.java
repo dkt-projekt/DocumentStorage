@@ -14,6 +14,7 @@ import de.dkt.eservices.edocumentstorage.service.SingleDocumentProcessor;
 import de.dkt.eservices.edocumentstorage.service.DocumentService;
 import de.dkt.eservices.edocumentstorage.service.NifConverterService;
 import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
+import de.dkt.eservices.edocumentstorage.service.SparqlCrudService;
 import eu.freme.common.persistence.dao.DocumentDAO;
 /**
  * @author Jan Nehring - jan.nehring@dfki.de
@@ -81,6 +82,11 @@ public class DocumentStorageConfig {
 	@Bean
 	public DocumentDAO documentDAO(){
 		return new DocumentDAO();
+	}
+	
+	@Bean
+	public SparqlCrudService sparqlCrudService(){
+		return new SparqlCrudService();
 	}
 }
 

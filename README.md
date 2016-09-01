@@ -115,3 +115,15 @@ This is a standard Java configuration parameter which can be set e.g. in the `ap
 **dkt.storage.data-dir**
 
 This is a standard Java configuration parameter which can be set e.g. in the `application.properties` file. It specifies the location which is used to store the upload files. The default value is "documents/".
+
+**dkt.storage.virtuoso-username**
+
+Specify the user name that has write access to the Virtuoso triple store.
+
+**dkt.storage.virtuoso-password**
+
+Specify the password of the user for write access to the Virtuoso triple store.
+
+**dkt.storage.virtuoso-crud-endpoint**
+
+Specify the API endpoint for write access to the Virtuoso triple store. E.g. `http://example.com:8890/sparql-graph-crud-auth`
