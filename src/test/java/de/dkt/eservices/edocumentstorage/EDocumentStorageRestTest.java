@@ -28,12 +28,16 @@ import eu.freme.common.starter.FREMEStarter;
 public class EDocumentStorageRestTest {
 
 	static ConfigurableApplicationContext appContext = null;
-	String url = "http://localhost:8098/document-storage/my-collection";
+	static String url;
 
 	@BeforeClass
 	public static void setup() {
 		appContext = FREMEStarter
 				.startPackageFromClasspath("spring-configurations/edocumentstorage.xml");
+		
+		String port = appContext.getEnvironment().getProperty("server.port");
+		url = "http://localhost:" + port + "/document-storage/my-collection";
+
 		EDocumentStorageRestTest.clearDb();
 	}
 
