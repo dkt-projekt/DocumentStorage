@@ -1,6 +1,6 @@
 # DocumentStorage
 
-The DocumentStorage module performs the upload of documents to the DKT platform. Each uploaded document will also processed by a series of Natural Language Processing services, the results will be stored in the Virtuoso triple store. The document storage organize the documents into separate collections. This image shows the components of the document upload:
+The DocumentStorage module performs the upload of documents to the DKT platform. When one or more documents are uploaded to the HTTP endpoint, they will be stored in the file system and in the MySQL database. The MySQL database stores metadata about each document, e.g. a state that marks if the document has been processed, if errors occured during processing, and other states. A number of worker threads uses this database table as a processing queue and processes the documents one after another. Each document is converted to NIF and then send to a pipeline. The processing pipeline is configurable and executes a number of e-Services one after another. The results are then stored in the triple store. This image shows this process:
 
 ![Document upload components](/images/document-upload-components.png?raw=true "Document upload components")
 
