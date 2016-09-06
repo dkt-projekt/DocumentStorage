@@ -1,6 +1,9 @@
 # DocumentStorage
 
-The DocumentStorage module performs the upload of documents to the DKT platform. Each uploaded document will also processed by a series of Natural Language Processing services, the results will be stored in the e-Sesame triple store. The document storage organize the documents into separate collections.
+The DocumentStorage module performs the upload of documents to the DKT platform. Each uploaded document will also processed by a series of Natural Language Processing services, the results will be stored in the e-Sesame triple store. The document storage organize the documents into separate collections. This image shows the components of the document upload:
+
+![Document upload components](/images/document-upload-components.png?raw=true "Document upload components")
+
 
 ## API endpoints
 
