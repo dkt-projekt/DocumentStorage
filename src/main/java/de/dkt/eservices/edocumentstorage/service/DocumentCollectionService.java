@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 import org.apache.log4j.Logger;
@@ -46,6 +48,12 @@ public class DocumentCollectionService {
 
 	@Autowired
 	TriplestoreService tripleStoreCrudService;
+
+	@Autowired
+	EntityManager entityManager;
+
+	@Autowired
+	DocumentProcessorService documentProcessorService;
 
 	/**
 	 * This variable describes the uri of the the graph in which the collection
@@ -108,12 +116,12 @@ public class DocumentCollectionService {
 	public void deleteCollection(DocumentCollection dc) throws IOException {
 
 		String graphUri = getGraphUri(dc);
-		
+
 		tripleStoreCrudService.deleteGraph(graphUri);
-		
+
 		File dir = getCollectionStorageDirectory(dc);
 		FileUtils.deleteDirectory(dir);
-		
+
 		documentCollectionRepository.delete(dc);
 	}
 
@@ -188,6 +196,13 @@ public class DocumentCollectionService {
 		}
 	}
 
+	/**
+	 * Construct the uri of the graph in the triple store of a collection out of
+	 * the collection name.
+	 * 
+	 * @param dc
+	 * @return
+	 */
 	public String getGraphUri(DocumentCollection dc) {
 		try {
 			return graphBaseUri + URLEncoder.encode(dc.getName(), "utf-8");
@@ -195,5 +210,30 @@ public class DocumentCollectionService {
 			logger.error(e);
 			return null;
 		}
+	}
+
+	/**
+	 * Helper function for resetErrorDocuments
+	 * 
+	 * @param dc
+	 */
+	// @Transactional
+	// private void resetErrorsExecuteSql(DocumentCollection dc){
+	// String queryStr = "UPDATE document SET error_message=NULL, status="
+	// + Document.Status.NOT_PROCESSED + " WHERE collection_name=\""
+	// + dc.getName() + "\" and status=" + Document.Status.ERROR + ";";
+	// Query query = entityManager.createNativeQuery(queryStr);
+	// query.executeUpdate();
+	// }
+
+	/**
+	 * Reset all documents in the collection with state=ERROR to
+	 * state=NOT_PROCESSED. It sets the error message of these documents to NULL
+	 * and starts the processing threads again so the documents will be
+	 * re-processed.
+	 */
+	public void resetErrorDocuments(DocumentCollection dc) {
+		documentCollectionRepository.resetErrorStates(dc.getName());
+		documentProcessorService.wakeupWorkers();
 	}
 }

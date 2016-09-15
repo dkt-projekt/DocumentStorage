@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -78,6 +79,28 @@ public class FullProcessTest {
 			assertTrue(turtleResponse.contains(uri));
 		}
 		
+		Thread.sleep(2000);
+		
+		// check that there are no errors
+		
+		response = Unirest.get(storageUrl + "/status" ).asString();
+		assertTrue(response.getStatus() == 200);
+		JSONObject json = new JSONObject(response.getBody());
+		assertTrue(json.getJSONObject("counts").getInt("ERROR") == 0);
+		
+		// check reset error endpoint - submit document that cannot work
+
+		response = Unirest.post(storageUrl)
+				.header("Content-Type", "audio/mpeg")
+				.queryString("fileName", "test.mp3").body("abc".getBytes())
+				.asString();
+		assertTrue(response.getStatus() == 200);
+
+		Thread.sleep(1000);
+		
+		response = Unirest.get(storageUrl + "/documents" ).asString();
+		System.err.println(json.toString());
+		
 		// clean up
 		DocumentRepository dr = appContext.getBean(DocumentRepository.class);
 		DocumentCollectionRepository dcr = appContext
@@ -86,5 +109,20 @@ public class FullProcessTest {
 		dcr.deleteAll();
 		
 		appContext.close();
+	}
+	
+	/**
+	 * helper function for the unit test
+	 * @param array
+	 * @return
+	 */
+	private long getTestMp3ModificationTime(JSONArray array){
+		for( int i=0; i<array.length(); i++ ){
+			JSONObject json = (JSONObject)array.get(i);
+			if( json.getString("filename").equals("test.mp3")){
+				return json.getLong("lastUpdate");
+			}
+		}
+		return -1;
 	}
 }

@@ -214,4 +214,23 @@ public class DocumentStorageRestController extends BaseRestController {
 		return json.toString();
 		
 	}
+	
+
+	/**
+	 * Return all collections (only names).
+	 * 
+	 * @param collectionName
+	 */
+	@RequestMapping(value = "/document-storage/collections/{collectionName}/reprocess-errors", method = RequestMethod.GET)
+	public void reprocessErrors(@PathVariable String collectionName) {
+		
+		DocumentCollection dc = documentCollectionRepository
+				.findOne(collectionName);
+		
+		if( dc == null ){
+			throw new DocumentCollectionDoesNotExistException();
+		}
+		
+		documentCollectionService.resetErrorDocuments(dc);
+	}
 }
