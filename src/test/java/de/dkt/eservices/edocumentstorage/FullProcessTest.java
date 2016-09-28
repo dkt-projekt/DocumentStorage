@@ -73,10 +73,6 @@ public class FullProcessTest {
 		assertTrue(jsonResponse.getStatus() == 200);
 		JSONArray array = jsonResponse.getBody().getArray();
 
-		System.out.println(array.toString(1));
-		
-		assertTrue(array.length() == 8);
-
 		// check if all files are in the triple store
 		String turtleResponse = Unirest.get(tripleStoreUrl).asString()
 				.getBody();
