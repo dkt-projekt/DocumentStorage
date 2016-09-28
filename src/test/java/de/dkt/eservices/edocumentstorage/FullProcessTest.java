@@ -66,7 +66,7 @@ public class FullProcessTest {
 		assertTrue(response.getStatus() == HttpStatus.OK.value());
 
 		// wait for 5 seconds
-		Thread.sleep(5000);
+		Thread.sleep(10000);
 
 		HttpResponse<JsonNode> jsonResponse = Unirest.get(
 				storageUrl + "/documents").asJson();
