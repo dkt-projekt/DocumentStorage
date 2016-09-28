@@ -79,7 +79,8 @@ public class DocumentStorageRestController extends BaseRestController {
 	public ResponseEntity<String> uploadFileHandler(
 			@RequestParam("fileName") String name, HttpServletRequest request,
 			@RequestHeader("Content-Type") String contentTypeHeader,
-			@PathVariable String collectionName) {
+			@PathVariable String collectionName,
+			@RequestParam(value="pipeline", required=false) Integer pipeline ) {
 
 		DocumentCollection dc = documentCollectionRepository
 				.findOneByName(collectionName);
@@ -99,7 +100,7 @@ public class DocumentStorageRestController extends BaseRestController {
 				IOUtils.copy(request.getInputStream(), fos);
 				fos.close();
 
-				documentCollectionService.addZipFileToCollection(dc, tempFile);
+				documentCollectionService.addZipFileToCollection(dc, tempFile, pipeline);
 			} catch (Exception e) {
 				logger.error("unzip failed", e);
 				throw new BadRequestException("failed to read zip archive");
@@ -112,7 +113,7 @@ public class DocumentStorageRestController extends BaseRestController {
 			// single file upload
 			try {
 				documentService.addFileToCollection(request.getInputStream(),
-						name, dc);
+						name, dc, pipeline);
 			} catch (IOException e) {
 				logger.error("file upload failed", e);
 				throw new InternalServerErrorException("file upload failed");

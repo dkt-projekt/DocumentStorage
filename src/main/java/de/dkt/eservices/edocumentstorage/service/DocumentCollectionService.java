@@ -150,7 +150,7 @@ public class DocumentCollectionService {
 	 * @throws IOException
 	 */
 	@Transactional
-	public void addZipFileToCollection(DocumentCollection dc, File inputFile)
+	public void addZipFileToCollection(DocumentCollection dc, File inputFile, Integer pipeline)
 			throws IOException {
 		ArrayList<Document> writtenFiles = new ArrayList<Document>();
 
@@ -167,7 +167,7 @@ public class DocumentCollectionService {
 				}
 				InputStream is = zipFile.getInputStream(entry);
 				Document doc = documentService.addFileToCollection(is,
-						entry.getName(), dc);
+						entry.getName(), dc, pipeline);
 				writtenFiles.add(doc);
 			}
 

@@ -57,11 +57,18 @@ public class SingleDocumentProcessor implements Runnable {
 	int id;
 	static int idCounter = 0;
 
+	/**
+	 * The API endpoint that contains the pipelining endpoint, is initialized to
+	 * a local pipelining endpoint
+	 */
 	String pipelineApiEndpoint;
 
 	@Value("${server.port:8080}")
 	String port;
 
+	/**
+	 * url that is injected as $base-url$ in the pipeline
+	 */
 	@Value("${dkt.storage.pipeline.base-url:null}")
 	String pipelineBaseUrl;
 
@@ -130,21 +137,42 @@ public class SingleDocumentProcessor implements Runnable {
 	private String executePipeline(Document doc, String turtle) {
 		try {
 
-			// construct pipeline
-			JSONArray pipeline = processorService.getPipeline();
-			pipeline.getJSONObject(0).put("body", turtle);
+			HttpRequestWithBody request = null;
+			String body = null;
+			if (doc.getPipeline() == null) {
+				// use default pipeline
 
-			// create http request including parameters
-			HttpRequestWithBody request = Unirest.post(pipelineApiEndpoint)
-					.header("Content-Type", "application/json");
+				// construct pipeline
+				JSONArray pipeline = processorService.getPipeline();
+				pipeline.getJSONObject(0).put("body", turtle);
+				body = pipeline.toString();
 
+				// create http request including parameters
+				request = Unirest.post(pipelineApiEndpoint).header(
+						"Content-Type", "application/json");
+				
+				logger.debug("document processor #" + id + ": process document with default pipeline\"");
+			} else {
+				// use specific pipeline
+				String uri = pipelineApiEndpoint;
+				if (!uri.endsWith("/")) {
+					uri += "/";
+				}
+				uri += doc.getPipeline().toString();
+				request = Unirest.post(uri).header("Content-Type",
+						"text/turtle");
+
+				body = turtle;
+				logger.debug("document processor #" + id + ": process document with specific pipeline\"");
+			}
+
+			// add pipeline parameters
 			request.queryString("base-url", pipelineBaseUrl);
 			request.queryString("collection-name", doc.getCollection()
 					.getName());
 
 			// execute http request
-			HttpResponse<String> response = request.body(pipeline.toString())
-					.asString();
+			HttpResponse<String> response = request.body(body).asString();
 
 			if (response.getStatus() != 200) {
 				dao.setErrorState(doc, response.getBody());

@@ -41,6 +41,8 @@ public class Document {
 	@JoinColumn(name = "collection_name")
 	@JsonIgnore
 	DocumentCollection collection;
+	
+	Integer pipeline;
 
 	public Document() {
 	}
@@ -130,4 +132,14 @@ public class Document {
 	public void setLastUpdate(Date lastUpdate) {
 		this.lastUpdate = lastUpdate;
 	}
+
+	public Integer getPipeline() {
+		return pipeline;
+	}
+
+	public void setPipeline(Integer pipeline) {
+		this.pipeline = pipeline;
+	}
+	
+	
 }

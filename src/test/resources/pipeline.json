@@ -9,14 +9,5 @@
   "parameters": {
   },
   "body": ""
-},
-{
-  "method": "POST",
-  "endpoint": "$base-url$/test-endpoint",
-  "parameters": {
-  	"storageName": "$collection-name$"
-  },
-  "headers": {
-  }
 }
 ]

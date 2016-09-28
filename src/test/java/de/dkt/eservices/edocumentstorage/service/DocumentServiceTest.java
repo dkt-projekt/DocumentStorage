@@ -55,7 +55,7 @@ public class DocumentServiceTest {
 		
 		// create collection and document
 		DocumentCollection collection = documentCollectionService.createCollection("dummy-collection");
-		Document doc = documentService.addFileToCollection(bais, "my-temp.file", collection);
+		Document doc = documentService.addFileToCollection(bais, "my-temp.file", collection, null);
 		
 		File[] list = documentCollectionService.getCollectionStorageDirectory(collection).listFiles(new FileFilter() {
 			@Override

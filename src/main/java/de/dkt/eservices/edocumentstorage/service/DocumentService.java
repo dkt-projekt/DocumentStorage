@@ -46,7 +46,7 @@ public class DocumentService {
 	 */
 	@Transactional
 	public Document addFileToCollection(InputStream inputStream,
-			String fileName, DocumentCollection documentCollection)
+			String fileName, DocumentCollection documentCollection, Integer pipeline)
 			throws IOException {
 
 		Document doc = new Document();
@@ -55,6 +55,7 @@ public class DocumentService {
 		doc.setCollection(documentCollection);
 		doc.setStatus(Document.Status.NOT_PROCESSED);
 		doc.setUploadTime(new Date());
+		doc.setPipeline(pipeline);
 		doc = documentRepository.save(doc);
 
 		File target = getDocumentLocation(doc);
