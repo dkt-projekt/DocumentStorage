@@ -13,6 +13,7 @@ API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collection
 HTTP method: POST
 Parameters:
 * URL parameter collection-name: The name of the collection
+* URL parameter pipeline (optional): The ID of a custom pipeline that is used to process this document. When the parameter is not set then the default processing pipeline will be used. See the [pipelining API](full.html#!/Pipelining/post_pipelining_templates) for information how to create a pipeline.
 
 CURL examples:
 
