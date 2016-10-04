@@ -45,7 +45,6 @@ public class FullProcessTest {
 		// add a file
 		// create collection
 		HttpResponse<String> response = Unirest.post(storageUrl).asString();
-		assertTrue(response.getStatus() == 200);		
 		
 		String str = new String("hello world");
 		response = Unirest.post(storageUrl + "/documents")
@@ -135,7 +134,6 @@ public class FullProcessTest {
 
 		// create collection
 		response = Unirest.post(storageUrl).asString();
-		assertTrue(response.getStatus() == 200);		
 		
 		// add file to this pipeline
 		response = Unirest.post(storageUrl + "/documents")
