@@ -33,13 +33,13 @@ CURL examples:
 #### Add an HTML file to the collection
 
 ```
-curl -X POST -d '<p>Welcome to Berlin!</p>' "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection?fileName=my-file.html"
+curl -X POST -d '<p>Welcome to Berlin!</p>' "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=my-file.html"
 ```
 
 #### Add a Zip file
 
 ```
-curl -X POST -H "Content-Type: application/zip" "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection?fileName=file2.zip"
+curl -X POST -H "Content-Type: application/zip" "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=file2.zip"
 ```
 
 ### Retrieve all documents from a collection
