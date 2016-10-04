@@ -7,9 +7,22 @@ The DocumentStorage module performs the upload of documents to the DKT platform.
 
 ## API endpoints
 
-### Add documents to the Document Storage
+### Create collection
 
 API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
+HTTP method: POST
+Parameters:
+* URL parameter collection-name: The name of the collection
+
+CURL example:
+
+```
+curl -X POST "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection"
+```
+
+### Add documents to the Document Storage
+
+API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/documents
 HTTP method: POST
 Parameters:
 * URL parameter collection-name: The name of the collection
