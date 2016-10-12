@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionDoesNotExistException;
 import de.dkt.eservices.edocumentstorage.service.DocumentCollectionService;
-import de.dkt.eservices.edocumentstorage.service.DocumentService;
 import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
+import de.dkt.eservices.edocumentstorage.service.DocumentService;
 import eu.freme.common.exception.BadRequestException;
 import eu.freme.common.exception.InternalServerErrorException;
 import eu.freme.common.persistence.dao.DocumentDAO;
@@ -80,7 +80,7 @@ public class DocumentStorageRestController extends BaseRestController {
 			@RequestParam("fileName") String name, HttpServletRequest request,
 			@RequestHeader("Content-Type") String contentTypeHeader,
 			@PathVariable String collectionName,
-			@RequestParam(value="pipeline", required=false) Integer pipeline ) {
+			@RequestParam("pipeline") int pipeline) {
 
 		DocumentCollection dc = documentCollectionRepository
 				.findOneByName(collectionName);
@@ -100,7 +100,7 @@ public class DocumentStorageRestController extends BaseRestController {
 				IOUtils.copy(request.getInputStream(), fos);
 				fos.close();
 
-				documentCollectionService.addZipFileToCollection(dc, tempFile, pipeline);
+				documentCollectionService.addZipFileToCollection(dc, tempFile,pipeline);
 			} catch (Exception e) {
 				logger.error("unzip failed", e);
 				throw new BadRequestException("failed to read zip archive");
