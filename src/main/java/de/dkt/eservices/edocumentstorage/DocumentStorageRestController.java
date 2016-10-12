@@ -26,9 +26,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionDoesNotExistException;
+import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionExistsException;
 import de.dkt.eservices.edocumentstorage.service.DocumentCollectionService;
-import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
 import de.dkt.eservices.edocumentstorage.service.DocumentService;
+import de.dkt.eservices.edocumentstorage.service.DocumentProcessorService;
 import eu.freme.common.exception.BadRequestException;
 import eu.freme.common.exception.InternalServerErrorException;
 import eu.freme.common.persistence.dao.DocumentDAO;
@@ -75,17 +76,17 @@ public class DocumentStorageRestController extends BaseRestController {
 	 * @param collectionName
 	 * @return
 	 */
-	@RequestMapping(value = "/document-storage/collections/{collectionName}", method = RequestMethod.POST)
+	@RequestMapping(value = "/document-storage/collections/{collectionName}/documents", method = RequestMethod.POST)
 	public ResponseEntity<String> uploadFileHandler(
 			@RequestParam("fileName") String name, HttpServletRequest request,
 			@RequestHeader("Content-Type") String contentTypeHeader,
 			@PathVariable String collectionName,
-			@RequestParam("pipeline") int pipeline) {
+			@RequestParam(value="pipeline", required=false) Integer pipeline ) {
 
 		DocumentCollection dc = documentCollectionRepository
 				.findOneByName(collectionName);
 		if (dc == null) {
-			dc = documentCollectionService.createCollection(collectionName);
+			throw new DocumentCollectionDoesNotExistException();
 		}
 
 		if (contentTypeHeader != null
@@ -100,7 +101,7 @@ public class DocumentStorageRestController extends BaseRestController {
 				IOUtils.copy(request.getInputStream(), fos);
 				fos.close();
 
-				documentCollectionService.addZipFileToCollection(dc, tempFile,pipeline);
+				documentCollectionService.addZipFileToCollection(dc, tempFile, pipeline);
 			} catch (Exception e) {
 				logger.error("unzip failed", e);
 				throw new BadRequestException("failed to read zip archive");
@@ -126,6 +127,20 @@ public class DocumentStorageRestController extends BaseRestController {
 		ResponseEntity<String> response = new ResponseEntity<String>(
 				"File uploaded successful", HttpStatus.OK);
 		return response;
+	}
+	
+	@RequestMapping(value = "/document-storage/collections/{collectionName}", method = RequestMethod.POST)
+	public String createCollection(
+			@PathVariable String collectionName) {
+
+		DocumentCollection dc = documentCollectionRepository
+				.findOneByName(collectionName);
+		if (dc == null) {
+			dc = documentCollectionService.createCollection(collectionName);
+			return "created collection \"" + collectionName + "\"";
+		} else{
+			throw new DocumentCollectionExistsException();
+		}
 	}
 
 	/**
