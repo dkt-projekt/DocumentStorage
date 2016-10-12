@@ -7,9 +7,22 @@ The DocumentStorage module performs the upload of documents to the DKT platform.
 
 ## API endpoints
 
-### Add documents to the Document Storage
+### Create collection
 
 API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
+HTTP method: POST
+Parameters:
+* URL parameter collection-name: The name of the collection
+
+CURL example:
+
+```
+curl -X POST "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection"
+```
+
+### Add documents to the Document Storage
+
+API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/documents
 HTTP method: POST
 Parameters:
 * URL parameter collection-name: The name of the collection
@@ -20,13 +33,13 @@ CURL examples:
 #### Add an HTML file to the collection
 
 ```
-curl -X POST -d '<p>Welcome to Berlin!</p>' "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection?fileName=my-file.html"
+curl -X POST -d '<p>Welcome to Berlin!</p>' "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=my-file.html"
 ```
 
 #### Add a Zip file
 
 ```
-curl -X POST -H "Content-Type: application/zip" "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection?fileName=file2.zip"
+curl -X POST -H "Content-Type: application/zip" "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=file2.zip"
 ```
 
 ### Retrieve all documents from a collection

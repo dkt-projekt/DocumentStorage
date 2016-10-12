@@ -43,8 +43,11 @@ public class FullProcessTest {
 		String tripleStoreUrl = baseUrl + "/test-endpoint";
 
 		// add a file
+		// create collection
+		HttpResponse<String> response = Unirest.post(storageUrl).asString();
+		
 		String str = new String("hello world");
-		HttpResponse<String> response = Unirest.post(storageUrl)
+		response = Unirest.post(storageUrl + "/documents")
 				.header("Content-Type", "text/plain")
 				.queryString("fileName", "test.txt").body(str.getBytes())
 				.asString();
@@ -60,7 +63,7 @@ public class FullProcessTest {
 		// add zip
 		byte[] data = FileUtils.readFileToByteArray(new File(
 				"src/test/resources/pipeline.zip"));
-		response = Unirest.post(storageUrl)
+		response = Unirest.post(storageUrl + "/documents")
 				.header("Content-Type", "application/zip")
 				.queryString("fileName", "file.zip").body(data).asString();
 		assertTrue(response.getStatus() == HttpStatus.OK.value());
@@ -129,8 +132,11 @@ public class FullProcessTest {
 		assertTrue(response.getStatus() == 200);
 		Integer pipelineId = json.getInt("id");
 
+		// create collection
+		response = Unirest.post(storageUrl).asString();
+		
 		// add file to this pipeline
-		response = Unirest.post(storageUrl)
+		response = Unirest.post(storageUrl + "/documents")
 				.header("Content-Type", "text/plain")
 				.queryString("fileName", "test.txt")
 				.queryString("pipeline", pipelineId)

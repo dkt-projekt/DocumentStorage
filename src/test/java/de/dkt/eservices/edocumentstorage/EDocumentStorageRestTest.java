@@ -20,6 +20,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import eu.freme.common.persistence.repository.DocumentCollectionRepository;
 import eu.freme.common.persistence.repository.DocumentRepository;
 import eu.freme.common.starter.FREMEStarter;
+
 /**
  * Test upload of a single file, upload of zip file, retrieval of these files
  * 
@@ -34,9 +35,10 @@ public class EDocumentStorageRestTest {
 	public static void setup() {
 		appContext = FREMEStarter
 				.startPackageFromClasspath("spring-configurations/edocumentstorage.xml");
-		
+
 		String port = appContext.getEnvironment().getProperty("server.port");
-		url = "http://localhost:" + port + "/document-storage/collections/my-collection";
+		url = "http://localhost:" + port
+				+ "/document-storage/collections/my-collection";
 
 		EDocumentStorageRestTest.clearDb();
 	}
@@ -51,19 +53,24 @@ public class EDocumentStorageRestTest {
 
 		String str = "hello world";
 
-		HttpResponse<String> response = Unirest.post(url)
-				.queryString("fileName", "my-file.txt")
+		// create collection
+		HttpResponse<String> response = Unirest.post(url).asString();
+		assertTrue(response.getStatus() == 200);
+
+		// upload file
+		response = Unirest.post(url + "/documents").queryString("fileName", "my-file.txt")
 				.header("Content-Type", "text/plain").body(str.getBytes())
 				.asString();
 		assertTrue(response.getStatus() == 200);
 
-		response = Unirest.post(url)
+		response = Unirest.post(url + "/documents")
 				.queryString("fileName", "my-other-file.txt")
 				.header("Content-Type", "text/plain").body(str.getBytes())
 				.asString();
 		assertTrue(response.getStatus() == 200);
 
-		HttpResponse<JsonNode> jsonResponse = Unirest.get(url + "/documents").asJson();
+		HttpResponse<JsonNode> jsonResponse = Unirest.get(url + "/documents")
+				.asJson();
 		assertTrue(jsonResponse.getBody().getArray().length() == 2);
 
 		EDocumentStorageRestTest.clearDb();
@@ -83,12 +90,18 @@ public class EDocumentStorageRestTest {
 		File file = new File("src/test/resources/pipeline.zip");
 		byte[] data = FileUtils.readFileToByteArray(file);
 
-		HttpResponse<String> responseStr = Unirest.post(url)
+		// create collection
+		HttpResponse<String> response = Unirest.post(url).asString();
+		assertTrue(response.getStatus() == 200);
+
+		// upload file
+		HttpResponse<String> responseStr = Unirest.post(url + "/documents")
 				.header("Content-Type", "application/zip")
 				.queryString("fileName", "file.zip").body(data).asString();
 		assertTrue(responseStr.getStatus() == HttpStatus.OK.value());
 
-		HttpResponse<JsonNode> jsonResponse = Unirest.get(url + "/documents").asJson();
+		HttpResponse<JsonNode> jsonResponse = Unirest.get(url + "/documents")
+				.asJson();
 		assertTrue(jsonResponse.getBody().getArray().length() > 0);
 
 		EDocumentStorageRestTest.clearDb();
