@@ -50,7 +50,7 @@ Parameters:
 * URL parameter collection-name: The name of the collection
 
 ```
-curl -X GET "http://dev.digitale-kuratierung.de/api/document-storage/my-collection/documents"
+curl -X GET "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents"
 ```
 
 Example Output:
@@ -99,7 +99,7 @@ Parameters:
 * URL parameter collection-name: The name of the collection
 
 ```
-curl -X GET -H "http://dev.digitale-kuratierung.de/api/document-storage/collections//my-collection/status"
+curl -X GET "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/status"
 ```
 
 Example Output:
@@ -132,7 +132,7 @@ Request method: GET
 Parameters: none
 
 ```
-curl -X GET -H "http://dev.digitale-kuratierung.de/api/document-storage/my-collection"
+curl -X GET "http://dev.digitale-kuratierung.de/api/document-storage/collections"
 ```
 
 Example Output:
