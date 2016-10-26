@@ -4,7 +4,6 @@ The DocumentStorage module performs the upload of documents to the DKT platform.
 
 ![Document upload components](/images/document-upload-components.png?raw=true "Document upload components")
 
-
 ## API endpoints
 
 ### Create collection
