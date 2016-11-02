@@ -20,6 +20,15 @@
 		<artifactId>freme-parent</artifactId>
 		<version>0.10</version>
 	</parent>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
+      </plugin>
+    </plugins>
+  </build>
 
 	<dependencies>
 		<dependency>
@@ -29,7 +38,7 @@
 		<dependency>
 			<groupId>de.dkt</groupId>
 			<artifactId>DKTCommon</artifactId>
-			<version>0.4-SNAPSHOT</version>
+			<version>0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
