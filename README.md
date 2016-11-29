@@ -8,7 +8,7 @@ The DocumentStorage module performs the upload of documents to the DKT platform.
 
 ### Create collection
 
-API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
+API endpoint: https://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
 HTTP method: POST
 Parameters:
 * URL parameter collection-name: The name of the collection
@@ -21,7 +21,7 @@ curl -X POST "http://dev.digitale-kuratierung.de/api/document-storage/collection
 
 ### Add documents to the Document Storage
 
-API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/documents
+API endpoint: https://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/documents
 HTTP method: POST
 Parameters:
 * URL parameter collection-name: The name of the collection
@@ -32,24 +32,24 @@ CURL examples:
 #### Add an HTML file to the collection
 
 ```
-curl -X POST -d '<p>Welcome to Berlin!</p>' "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=my-file.html"
+curl -X POST -d '<p>Welcome to Berlin!</p>' "https://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=my-file.html"
 ```
 
 #### Add a Zip file
 
 ```
-curl -X POST -H "Content-Type: application/zip" "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=file2.zip"
+curl -X POST -H "Content-Type: application/zip" "https://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents?fileName=file2.zip"
 ```
 
 ### Retrieve all documents from a collection
 
-API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/documents
+API endpoint: https://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/documents
 Request method: GET
 Parameters: 
 * URL parameter collection-name: The name of the collection
 
 ```
-curl -X GET "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents"
+curl -X GET "https://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/documents"
 ```
 
 Example Output:
@@ -92,13 +92,13 @@ Example Output:
 ### Retrieve aggregated status information from a collection
 
 
-API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/status
+API endpoint: https://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}/status
 Request method: GET
 Parameters: 
 * URL parameter collection-name: The name of the collection
 
 ```
-curl -X GET "http://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/status"
+curl -X GET "https://dev.digitale-kuratierung.de/api/document-storage/collections/my-collection/status"
 ```
 
 Example Output:
@@ -119,19 +119,19 @@ Example Output:
 
 Delete a collection. This will delete the collection from the database, delete all its file from the server and also delete the data from the triple store.
 
-API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
+API endpoint: https://dev.digitale-kuratierung.de/api/document-storage/collections/{collection-name}
 Request method: DELETE
 Parameters:
 * URL parameter collection-name: The name of the collection
 
 ### Get all collections
 
-API endpoint: http://dev.digitale-kuratierung.de/api/document-storage/collections
+API endpoint: https://dev.digitale-kuratierung.de/api/document-storage/collections
 Request method: GET
 Parameters: none
 
 ```
-curl -X GET "http://dev.digitale-kuratierung.de/api/document-storage/collections"
+curl -X GET "https://dev.digitale-kuratierung.de/api/document-storage/collections"
 ```
 
 Example Output:
