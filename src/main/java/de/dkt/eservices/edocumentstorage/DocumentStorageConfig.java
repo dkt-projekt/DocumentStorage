@@ -43,9 +43,6 @@ public class DocumentStorageConfig {
 		if( !documentStorageLocation.exists() && !documentStorageLocation.mkdirs()){
 			throw new RuntimeException(String.format("Cannot create storage directory \"%s\"", documentStorageLocation)); 
 		}		
-		
-		// set ssl protokoll
-		System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
 	}
 	
 	public File getDocumentStorageLocation(){
