@@ -15,6 +15,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +46,8 @@ public class TriplestoreService {
 	 */
 	@Value("${dkt.storage.virtuoso-crud-endpoint}")
 	String crudApiEndpoint;
+	
+	Logger logger = Logger.getLogger(TriplestoreService.class);
 
 	private CloseableHttpClient getHttpClient() {
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -82,6 +85,10 @@ public class TriplestoreService {
 			response = httpclient.execute(request);
 			StatusLine sl = response.getStatusLine();
 			ok = sl.getStatusCode() == 200 || sl.getStatusCode() == 201;
+			
+			if(!ok){
+				logger.error("Triplestore returned status \"" + sl.getStatusCode() + "\" when trying to write data to it.");
+			}
 		} finally {
 			if (response != null) {
 				response.close();

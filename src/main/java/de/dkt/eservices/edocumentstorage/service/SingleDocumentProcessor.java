@@ -198,7 +198,7 @@ public class SingleDocumentProcessor implements Runnable {
 				.getCollection());
 		try {
 			return sparqlCrudService.addDataToStore(graphUri, enrichedTurtle);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logger.error(e);
 			dao.setErrorState(doc, e.getMessage());
 			return false;
@@ -249,6 +249,8 @@ public class SingleDocumentProcessor implements Runnable {
 					doc.setLastUpdate(new Date());
 					doc.setStatus(Status.PROCESSED);
 					documentRepository.save(doc);
+				} else{
+					dao.setErrorState(doc, "Could not write document to the triple store.");
 				}
 			} catch (Exception e) {
 				logger.error(e);
