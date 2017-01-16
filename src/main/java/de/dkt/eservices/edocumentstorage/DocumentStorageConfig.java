@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,6 +32,8 @@ public class DocumentStorageConfig {
 	// file that points to documentStorageLocationStr
 	File documentStorageLocation;
 	
+	Logger logger = Logger.getLogger(DocumentStorageConfig.class);
+	
 	@PostConstruct
 	public void postConstruct(){
 		
@@ -43,6 +46,8 @@ public class DocumentStorageConfig {
 		if( !documentStorageLocation.exists() && !documentStorageLocation.mkdirs()){
 			throw new RuntimeException(String.format("Cannot create storage directory \"%s\"", documentStorageLocation)); 
 		}		
+		
+		logger.error("TEST MESSAGE");
 	}
 	
 	public File getDocumentStorageLocation(){
