@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>de.dkt</groupId>
 			<artifactId>DKTCommon</artifactId>
-			<version>0.5</version>
+			<version>0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tika</groupId>
@@ -113,7 +113,7 @@
 		<connection>scm:git:git@github.com:dkt-projekt/DocumentStorage.git</connection>
 		<url>scm:git:git@github.com/dkt-projekt/DocumentStorage.git</url>
 		<developerConnection>scm:git:git@github.com:dkt-projekt/DocumentStorage.git</developerConnection>
-		<tag>DocumentStorage-0.5</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 </project>
