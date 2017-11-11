@@ -1,9 +1,13 @@
 package de.dkt.eservices.edocumentstorage.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URLEncoder;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +20,11 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 
+import de.dkt.common.niftools.NIFReader;
+import de.dkt.common.niftools.NIFWriter;
 import eu.freme.common.conversion.rdf.RDFConstants;
 import eu.freme.common.conversion.rdf.RDFConversionService;
+import eu.freme.common.conversion.rdf.RDFConstants.RDFSerialization;
 import eu.freme.common.persistence.dao.DocumentDAO;
 import eu.freme.common.persistence.model.Document;
 
@@ -63,21 +70,27 @@ public class NifConverterService {
 	 */
 	public String convertToTurtle(Document doc) throws Exception {
 		String thisPrefix = prefix + URLEncoder.encode(doc.getPath(), "utf-8");
-		HttpResponse<String> response = Unirest
-				.post(nifConverterUrl)
-				.queryString("informat", "TIKAFile")
-				.queryString("prefix", thisPrefix)
-				.header("Accept", "text/turtle")
-				.field("inputFile", documentService.getDocumentLocation(doc))
-				.asString();
-
-		if( response.getStatus() == 200 ){
-			String ttl = response.getBody().toString();
-			return ttl;
-		} else{
-			documentDao.setErrorState(doc, response.toString());
-			throw new RuntimeException(response.toString());
-		}
+		Model output = NIFWriter.initializeOutputModel();
+		String fileName = doc.getPath() + File.separator + doc.getFilename();
+		InputStream is = new FileInputStream(fileName);
+		String content = IOUtils.toString(is);
+		NIFWriter.addInitialString(output, content, thisPrefix);
+		return NIFReader.model2String(output, RDFSerialization.TURTLE);
+//		HttpResponse<String> response = Unirest
+//				.post(nifConverterUrl)
+//				.queryString("informat", "TIKAFile")
+//				.queryString("prefix", thisPrefix)
+//				.header("Accept", "text/turtle")
+//				.field("inputFile", documentService.getDocumentLocation(doc))
+//				.asString();
+//
+//		if( response.getStatus() == 200 ){
+//			String ttl = response.getBody().toString();
+//			return ttl;
+//		} else{
+//			documentDao.setErrorState(doc, response.toString());
+//			throw new RuntimeException(response.toString());
+//		}
 	}
 
 	/**
