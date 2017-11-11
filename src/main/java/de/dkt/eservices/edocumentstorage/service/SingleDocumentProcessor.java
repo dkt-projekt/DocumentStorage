@@ -74,11 +74,12 @@ public class SingleDocumentProcessor implements Runnable {
 
 	@PostConstruct
 	public void init() {
-		pipelineApiEndpoint = "http://localhost:" + port.trim()
-				+ "/pipelining/chain";
+//		pipelineApiEndpoint = "http://localhost:" + port.trim() + "/pipelining/chain";
+		pipelineApiEndpoint = "https://dev.digitale-kuratierung.de/api/pipelining/chain";
 
 		if (pipelineBaseUrl.equals("null")) {
-			pipelineBaseUrl = "http://localhost:" + port;
+//			pipelineBaseUrl = "http://localhost:" + port;
+			pipelineBaseUrl = "https://dev.digitale-kuratierung.de/api/";
 		}
 	}
 
@@ -143,6 +144,9 @@ public class SingleDocumentProcessor implements Runnable {
 				// use default pipeline
 
 				// construct pipeline
+				
+				int pipe = doc.getPipeline();
+				
 				JSONArray pipeline = processorService.getPipeline();
 				pipeline.getJSONObject(0).put("body", turtle);
 				body = pipeline.toString();
@@ -159,9 +163,7 @@ public class SingleDocumentProcessor implements Runnable {
 					uri += "/";
 				}
 				uri += doc.getPipeline().toString();
-				request = Unirest.post(uri).header("Content-Type",
-						"text/turtle");
-
+				request = Unirest.post(uri).header("Content-Type","text/turtle");
 				body = turtle;
 				logger.debug("document processor #" + id + ": process document with specific pipeline\"");
 			}

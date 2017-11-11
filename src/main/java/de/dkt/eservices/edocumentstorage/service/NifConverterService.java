@@ -42,7 +42,8 @@ public class NifConverterService {
 
 	@PostConstruct
 	public void init() {
-		nifConverterUrl = "http://localhost:" + port + "/toolbox/nif-converter";
+//		nifConverterUrl = "http://localhost:" + port + "/toolbox/nif-converter";
+		nifConverterUrl = "https://dev.digitale-kuratierung.de/api/toolbox/nif-converter";
 	}
 
 	@Autowired
