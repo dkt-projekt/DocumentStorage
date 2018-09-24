@@ -118,7 +118,17 @@ public class SingleDocumentProcessor implements Runnable {
 		}
 		return turtle;
 	}
-
+	
+	
+	private String getTurtleContent(String turtle) {
+		int contentBegin = turtle.indexOf("nif:isString");
+		int contentEnd = turtle.indexOf("^^xsd:string .");
+		turtle = turtle.substring(contentBegin, contentEnd-1);
+		String content = turtle.replaceFirst("nif:isString\\s*", "").substring(1);
+		return content;
+	}
+	
+	
 	private boolean addUriToDoc(Document doc, String turtle) {
 		String resourceUri = null;
 		try {
@@ -144,9 +154,7 @@ public class SingleDocumentProcessor implements Runnable {
 				// use default pipeline
 
 				// construct pipeline
-				
-				int pipe = doc.getPipeline();
-				
+								
 				JSONArray pipeline = processorService.getPipeline();
 				pipeline.getJSONObject(0).put("body", turtle);
 				body = pipeline.toString();
@@ -227,19 +235,23 @@ public class SingleDocumentProcessor implements Runnable {
 
 				// convert to turtle
 				String turtle = convertToTurtle(doc);
-				logger.debug("before\n" + turtle);
 				if (turtle == null) {
 					continue;
 				}
+				
+
+				
+				logger.debug("before\n" + turtle);
 
 				// extract resource name and store as file
 				if (!addUriToDoc(doc, turtle)) {
 					continue;
 				}
 
+				String content = getTurtleContent(turtle);
 				// execute pipeline
 				String enrichedTurtle = null;
-				if ((enrichedTurtle = executePipeline(doc, turtle)) == null) {
+				if ((enrichedTurtle = executePipeline(doc, content)) == null) {
 					continue;
 				}
 

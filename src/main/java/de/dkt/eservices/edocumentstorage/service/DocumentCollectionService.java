@@ -17,10 +17,10 @@ import javax.transaction.Transactional;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import de.dkt.eservices.edocumentstorage.DocumentStorageConfig;
-import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionDoesNotExistException;
 import de.dkt.eservices.edocumentstorage.exception.DocumentCollectionExistsException;
 import de.dkt.eservices.edocumentstorage.exception.InvalidDocumentCollectionNameException;
 import eu.freme.common.persistence.model.Document;
@@ -47,13 +47,9 @@ public class DocumentCollectionService {
 	@Autowired
 	TriplestoreService tripleStoreCrudService;
 
-	/**
-	 * This variable describes the uri of the the graph in which the collection
-	 * data is stored in the triple store. The collection name will be appended
-	 * to the graph uri.
-	 */
-	String graphBaseUri = "http://digitale-kuratierung.de/ns/graphs/";
-
+	@Value("${dkt.storage.graph-prefix:http://freme-project.eu/ns/graphs/}")
+	String graphBaseUri;
+	
 	Logger logger = Logger.getLogger(DocumentCollection.class);
 
 	/**
