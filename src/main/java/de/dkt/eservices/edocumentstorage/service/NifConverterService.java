@@ -71,8 +71,9 @@ public class NifConverterService {
 	public String convertToTurtle(Document doc) throws Exception {
 		String thisPrefix = prefix + URLEncoder.encode(doc.getPath(), "utf-8");
 		Model output = NIFWriter.initializeOutputModel();
-		String fileName = doc.getPath();
-		InputStream is = new FileInputStream(fileName);
+		File file = documentService.getDocumentLocation(doc);
+		//String fileName = doc.getPath();
+		InputStream is = new FileInputStream(file);
 		String content = IOUtils.toString(is);
 		NIFWriter.addInitialString(output, content, thisPrefix);
 		return NIFReader.model2String(output, RDFSerialization.TURTLE);

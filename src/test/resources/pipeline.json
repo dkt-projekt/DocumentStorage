@@ -1,7 +1,7 @@
 [
 {
   "method": "POST",
-  "endpoint": "$base-url$/e-capitalization",
+  "endpoint": "http://localhost:8093/e-capitalization",
   "headers": {
     "content-type": "text/turtle",
     "accept": "text/turtle"

@@ -57,12 +57,6 @@ public class SingleDocumentProcessor implements Runnable {
 	int id;
 	static int idCounter = 0;
 
-	/**
-	 * The API endpoint that contains the pipelining endpoint, is initialized to
-	 * a local pipelining endpoint
-	 */
-	String pipelineApiEndpoint;
-
 	@Value("${server.port:8080}")
 	String port;
 
@@ -71,18 +65,7 @@ public class SingleDocumentProcessor implements Runnable {
 	 */
 	@Value("${dkt.storage.pipeline.base-url:null}")
 	String pipelineBaseUrl;
-
-	@PostConstruct
-	public void init() {
-//		pipelineApiEndpoint = "http://localhost:" + port.trim() + "/pipelining/chain";
-		pipelineApiEndpoint = "https://dev.digitale-kuratierung.de/api/pipelining/chain";
-
-		if (pipelineBaseUrl.equals("null")) {
-//			pipelineBaseUrl = "http://localhost:" + port;
-			pipelineBaseUrl = "https://dev.digitale-kuratierung.de/api/";
-		}
-	}
-
+	
 	boolean running = true;
 
 	public SingleDocumentProcessor() {
@@ -141,29 +124,10 @@ public class SingleDocumentProcessor implements Runnable {
 			HttpRequestWithBody request = null;
 			String body = null;
 			if (doc.getPipeline() == null) {
-				// use default pipeline
-
-				// construct pipeline
-				
-				int pipe = doc.getPipeline();
-				
-				JSONArray pipeline = processorService.getPipeline();
-				pipeline.getJSONObject(0).put("body", turtle);
-				body = pipeline.toString();
-
-				// create http request including parameters
-				request = Unirest.post(pipelineApiEndpoint).header(
-						"Content-Type", "application/json");
-				
-				logger.debug("document processor #" + id + ": process document with default pipeline\"");
+				throw new RuntimeException("Pipeline is not set");
 			} else {
 				// use specific pipeline
-				String uri = pipelineApiEndpoint;
-				if (!uri.endsWith("/")) {
-					uri += "/";
-				}
-				uri += doc.getPipeline().toString();
-				request = Unirest.post(uri).header("Content-Type","text/turtle");
+				request = Unirest.post(doc.getPipeline()).header("Content-Type","text/turtle");
 				body = turtle;
 				logger.debug("document processor #" + id + ": process document with specific pipeline\"");
 			}
@@ -255,7 +219,7 @@ public class SingleDocumentProcessor implements Runnable {
 					dao.setErrorState(doc, "Could not write document to the triple store.");
 				}
 			} catch (Exception e) {
-				logger.error(e);
+				logger.error("An exception occured", e);
 				if (doc != null) {
 					dao.setErrorState(doc, e.getMessage());
 				}

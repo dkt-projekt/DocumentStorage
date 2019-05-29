@@ -81,7 +81,7 @@ public class DocumentStorageRestController extends BaseRestController {
 			@RequestParam("fileName") String name, HttpServletRequest request,
 			@RequestHeader("Content-Type") String contentTypeHeader,
 			@PathVariable String collectionName,
-			@RequestParam(value="pipeline", required=false) Integer pipeline ) {
+			@RequestParam(value="pipeline", required=true) String pipeline ) {
 
 		DocumentCollection dc = documentCollectionRepository
 				.findOneByName(collectionName);

@@ -42,7 +42,7 @@ public class Document {
 	@JsonIgnore
 	DocumentCollection collection;
 	
-	Integer pipeline;
+	String pipeline;
 
 	public Document() {
 	}
@@ -133,11 +133,11 @@ public class Document {
 		this.lastUpdate = lastUpdate;
 	}
 
-	public Integer getPipeline() {
+	public String getPipeline() {
 		return pipeline;
 	}
 
-	public void setPipeline(Integer pipeline) {
+	public void setPipeline(String pipeline) {
 		this.pipeline = pipeline;
 	}
 	

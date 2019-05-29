@@ -46,7 +46,7 @@ public class DocumentService {
 	 */
 	@Transactional
 	public Document addFileToCollection(InputStream inputStream,
-			String fileName, DocumentCollection documentCollection, Integer pipeline)
+			String fileName, DocumentCollection documentCollection, String pipeline)
 			throws IOException {
 
 		Document doc = new Document();
