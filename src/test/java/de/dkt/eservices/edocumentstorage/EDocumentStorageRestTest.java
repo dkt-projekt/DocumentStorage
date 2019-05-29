@@ -59,12 +59,14 @@ public class EDocumentStorageRestTest {
 
 		// upload file
 		response = Unirest.post(url + "/documents").queryString("fileName", "my-file.txt")
+				.queryString("pipeline", "http://test.de/pipeline")
 				.header("Content-Type", "text/plain").body(str.getBytes())
 				.asString();
 		assertTrue(response.getStatus() == 200);
 
 		response = Unirest.post(url + "/documents")
 				.queryString("fileName", "my-other-file.txt")
+				.queryString("pipeline", "http://test.de/pipeline")
 				.header("Content-Type", "text/plain").body(str.getBytes())
 				.asString();
 		assertTrue(response.getStatus() == 200);
@@ -97,6 +99,7 @@ public class EDocumentStorageRestTest {
 		// upload file
 		HttpResponse<String> responseStr = Unirest.post(url + "/documents")
 				.header("Content-Type", "application/zip")
+				.queryString("pipeline", "http://test.de/pipeline")
 				.queryString("fileName", "file.zip").body(data).asString();
 		assertTrue(responseStr.getStatus() == HttpStatus.OK.value());
 
